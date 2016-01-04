@@ -4,6 +4,7 @@
   "keywords": ["cURL"],
   "homepage": "https://github.com/stk2k/grasshopper",
   "version": "0.1.0",
+  "type": "library",
   "license": "MIT",
   "authors": [
     {
@@ -13,6 +14,9 @@
   ],
   "require": {
     "php": ">=5.4.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.7.*"
   },
   "autoload": {
     "psr-4": {
