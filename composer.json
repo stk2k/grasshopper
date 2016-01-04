@@ -1,0 +1,20 @@
+{
+  "name": "stk2k/grasshopper",
+  "description": "Thin wrapper class library of cURL",
+  "keywords": ["cURL"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Katsuki Shuto",
+      "email": "stk2k@sazysoft.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "grasshopper\\": "src/"
+    }
+  }
+}
