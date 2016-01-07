@@ -137,6 +137,15 @@ class CurlResponse
     }
 
     /**
+     * Get content length
+     *
+     * @return string
+     */
+    public function getContentLength(){
+        return $this->download_content_length;
+    }
+
+    /**
      * Get charset
      *
      * @return string
@@ -207,6 +216,9 @@ class CurlResponse
             if ( preg_match( '@Content-Encoding:\s+([\w/+]+)@i', $h, $matches ) ){
                 $this->content_encoding = isset($matches[1]) ? strtolower($matches[1]) : null;
             }
+            if ( preg_match( '@Content-Type:\s*([\w/+-\/]+);\s*charset=\s*([\w/+\-]+)@i', $h, $matches ) ){
+                $this->charset = isset($matches[2]) ? strtolower($matches[2]) : null;
+            }
             elseif ( preg_match( '@Host:\s+([\w/:+]+)@i', $h, $matches ) ){
                 $this->host = isset($matches[1]) ? strtolower($matches[1]) : null;
             }
@@ -224,7 +236,7 @@ class CurlResponse
     {
         // get character encoding from Content-Type header
         preg_match( '@([\w/+]+)(;\s+charset=(\S+))?@i', $this->content_type, $matches );
-        $charset = isset($matches[3]) ? $matches[3] : null;
+        $charset = isset($matches[3]) ? $matches[3] : $this->charset;
 
         $php_encoding = $charset ? self::getPhpEncoding($charset) : null;
         if ( !$php_encoding ){
