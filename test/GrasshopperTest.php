@@ -2,35 +2,41 @@
 namespace Grasshopper;
 
 use \Grasshopper\CurlRequest;
+use \Grasshopper\CurlResponse;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
     public function testMultiRequest()
     {
-        $options = [
-            'complete' => function(CurlResponse $response){
-                echo "[success]" . PHP_EOL;
-                echo "- URL:" . $response->getRequestUrl() . PHP_EOL;
-                echo "- effective URL:" . $response->getEffectiveUrl() . PHP_EOL;
-                echo "- charset:" . $response->getCharset() . PHP_EOL;
-                echo "- HTML:" . PHP_EOL;
-                echo $response->getBody(). PHP_EOL;
-
-            },
-            'error' => function(CurlError $error){
-                echo "[failed]" . PHP_EOL;
-                echo "- URL:" . $error->getRequestUrl() . PHP_EOL;
-
-            },
-        ];
+        $url = 'http://localhost:8000/test1.html';
 
         $hopper = new Grasshopper();
 
+        $hopper->addRequest(new CurlRequest($url));
 
-        $hopper->addRequest(new CurlRequest('http://localhost/test1.html',$options));
-
-        $hopper->perform();
         $result = $hopper->waitForAll();
+
+        //var_dump($result);
+
+        /** @var CurlResponse $res */
+        $res = $result[$url];
+
+        $this->assertEquals('Grasshopper\CurlResponse', get_class($res) );
+
+        //echo 'body:' . $res->getBody() . PHP_EOL;
+
+        $doc = new \DOMDocument();
+        @$doc->loadHTML($res->getBody());
+
+        $xpath = new \DOMXpath( $doc );
+
+        $title = $xpath->query('//head/title[1]')->item(0)->nodeValue;
+
+        $this->assertEquals('test data1', $title );
+
+        $boo = $xpath->query('//body')->item(0)->nodeValue;
+
+        $this->assertEquals('boo', trim($boo) );
 
         echo "finished." . PHP_EOL;
 

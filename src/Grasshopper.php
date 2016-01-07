@@ -120,32 +120,6 @@ class Grasshopper
     }
 
     /**
-     * Execute requests
-     *
-     * @param int $usleep
-     */
-    public function perform($usleep = self::DEFAULT_USLEEP)
-    {
-        if ( !$this->mh ){
-            throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
-        }
-
-        // execute curl multi
-        do {
-            $stat = curl_multi_exec($this->mh, $running);
-            if ( $running ){
-                usleep($usleep);
-                continue;
-            }
-        } while ($stat === CURLM_CALL_MULTI_PERFORM);
-
-        if ( $stat !== CURLM_OK ) {
-            $errmsg = curl_multi_strerror($stat);
-            throw new GrasshopperException('curl_multi_exec failed:'. $errmsg, self::ERROR_MULTI_EXEC);
-        }
-    }
-
-    /**
      * wait for all responses
      *
      * @param int $usleep
