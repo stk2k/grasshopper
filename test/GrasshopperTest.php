@@ -6,6 +6,33 @@ use \Grasshopper\CurlResponse;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
+    public function testAddRequest()
+    {
+        $hopper = new Grasshopper();
+
+        $this->assertEquals(0, count($hopper->getRequests()) );
+
+        $hopper->addRequest(new CurlRequest('http://localhost:8000/test1.html'));
+
+        $this->assertEquals(1, count($hopper->getRequests()) );
+    }
+
+    public function testAddRequests()
+    {
+        $hopper = new Grasshopper();
+
+        $this->assertEquals(0, count($hopper->getRequests()) );
+
+        $hopper->addRequests(
+            [
+                new CurlRequest('http://localhost:8000/test1.html'),
+                new CurlRequest('http://localhost:8000/test1.html'),
+            ]
+        );
+
+        $this->assertEquals(2, count($hopper->getRequests()) );
+    }
+
     public function testWaitForAll()
     {
         $url = 'http://localhost:8000/test1.html';

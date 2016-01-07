@@ -86,6 +86,16 @@ class Grasshopper
     }
 
     /**
+     * Get requests
+     *
+     * @return CurlRequest[]
+     */
+    public function getRequests()
+    {
+        return $this->requests;
+    }
+
+    /**
      * Add request
      *
      * @param CurlRequest $request
