@@ -3,7 +3,6 @@
   "description": "Thin wrapper class library of cURL",
   "keywords": ["cURL"],
   "homepage": "https://github.com/stk2k/grasshopper",
-  "version": "0.1.0",
   "type": "library",
   "license": "MIT",
   "authors": [
