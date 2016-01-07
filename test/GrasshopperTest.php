@@ -1,7 +1,8 @@
 <?php
 namespace Grasshopper;
 
-use \Grasshopper\CurlRequest;
+use \Grasshopper\HttpGetRequest;
+use \Grasshopper\HttpPostRequest;
 use \Grasshopper\CurlResponse;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
@@ -12,7 +13,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $this->assertEquals(0, count($hopper->getRequests()) );
 
-        $hopper->addRequest(new CurlRequest('http://localhost:8000/test1.html'));
+        $hopper->addRequest(new HttpGetRequest('http://localhost:8000/test1.html'));
 
         $this->assertEquals(1, count($hopper->getRequests()) );
     }
@@ -25,8 +26,8 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $hopper->addRequests(
             [
-                new CurlRequest('http://localhost:8000/test1.html'),
-                new CurlRequest('http://localhost:8000/test1.html'),
+                new HttpGetRequest('http://localhost:8000/test1.html'),
+                new HttpGetRequest('http://localhost:8000/test1.html'),
             ]
         );
 
@@ -39,7 +40,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $hopper = new Grasshopper();
 
-        $hopper->addRequest(new CurlRequest($url));
+        $hopper->addRequest(new HttpGetRequest($url));
 
         $result = $hopper->waitForAll();
 

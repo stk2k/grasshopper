@@ -5,6 +5,9 @@ namespace Grasshopper;
 class CurlRequest
 {
     /** @var string */
+    private $method;
+
+    /** @var string */
     private $url;
 
     /** @var callable */
@@ -17,13 +20,17 @@ class CurlRequest
     private $ch;
 
     /**
-     * Constructs grasshopper object
+     * Constructs cURL request object
      *
+     * @param string $method
      * @param string $url
      * @param array $options
      */
-    public function __construct($url, array $options = [])
+    public function __construct($method, $url, array $options = [])
     {
+        // method
+        $this->method = $method;
+
         // URL
         $this->url = $url;
         if ( parse_url($url) === false ){
@@ -59,6 +66,11 @@ class CurlRequest
 
             /* SSL */
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+
+            /* HTTP/POST */
+            CURLOPT_POST => false,
+            CURLOPT_POSTFIELDS => '',
 
             /* redirection */
             CURLOPT_MAXREDIRS => 10,
@@ -74,6 +86,10 @@ class CurlRequest
             CURLOPT_TIMEOUT => isset($options['timeout']) ? $options['timeout'] : null,
             CURLOPT_CONNECTTIMEOUT => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
             CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : null,
+
+            /* HTTP/POST */
+            CURLOPT_POST => ($this instanceof HttpPostRequest),
+            CURLOPT_POSTFIELDS => isset($options['post_fields']) ? $options['post_fields'] : null,
 
             /* redirection */
             CURLOPT_MAXREDIRS => isset($options['max_redirs']) ? $options['max_redirs'] : null,
