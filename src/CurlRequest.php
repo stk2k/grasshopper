@@ -22,7 +22,7 @@ class CurlRequest
      * @param string $url
      * @param array $options
      */
-    public function __construct($url, array $options = array())
+    public function __construct($url, array $options = [])
     {
         // URL
         $this->url = $url;
@@ -31,8 +31,8 @@ class CurlRequest
         }
 
         // callbacks
-        $this->complete_callback = isset($options['complete']) ? $options['complete'] : NULL;
-        $this->error_callback = isset($options['error']) ? $options['error'] : NULL;
+        $this->complete_callback = isset($options['complete']) ? $options['complete'] : null;
+        $this->error_callback = isset($options['error']) ? $options['error'] : null;
 
         if ( $this->complete_callback && !is_callable($this->complete_callback) ){
             throw new GrasshopperException('invalid complete callback', Grasshopper::ERROR_INVALID_REQUEST_PARAMETER);
@@ -43,22 +43,19 @@ class CurlRequest
 
         // options
         $dafaults = [
+            /* user NOT customizable fields by options parameter */
             CURLOPT_URL => $url,
             CURLOPT_HEADER => true,
-            CURLOPT_USERAGENT =>Grasshopper::DEFAULT_USERAGENT,
+            CURLOPT_RETURNTRANSFER => true,
+
+            /* user customizable fields by options parameter */
+            CURLOPT_USERAGENT => Grasshopper::DEFAULT_USERAGENT,
             CURLOPT_PROXY => null,
-            CURLOPT_HTTPHEADER => array(
-                "HTTP/1.0",
-                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Encoding:gzip ,deflate",
-                "Accept-Language:en-us;q=0.7,en;q=0.3",
-                "Connection:keep-alive",
-                "User-Agent:" . Grasshopper::DEFAULT_USERAGENT
-            ),
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_NONE,
+            CURLOPT_HTTPHEADER => (new CurlRequestHeader)->compile(),
             CURLOPT_TIMEOUT => 60,
             CURLOPT_CONNECTTIMEOUT => 60,
             CURLOPT_BUFFERSIZE => 1024,
-            CURLOPT_RETURNTRANSFER => true,
 
             /* SSL */
             CURLOPT_SSL_VERIFYPEER => false,
@@ -69,20 +66,32 @@ class CurlRequest
         ];
 
         $user_curl_options = [
-            CURLOPT_USERAGENT => isset($options['user_agent']) ? $options['user_agent'] : NULL,
-            CURLOPT_PROXY => isset($options['proxy']) ? $options['proxy'] : NULL,
-            CURLOPT_HTTPHEADER => isset($options['http_header']) ? $options['http_header'] : NULL,
-            CURLOPT_TIMEOUT => isset($options['timeout']) ? $options['timeout'] : NULL,
-            CURLOPT_CONNECTTIMEOUT => isset($options['connect_timeout']) ? $options['connect_timeout'] : NULL,
-            CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : NULL,
+            /* user customizable fields by options parameter */
+            CURLOPT_USERAGENT => isset($options['user_agent']) ? $options['user_agent'] : null,
+            CURLOPT_PROXY => isset($options['proxy']) ? $options['proxy'] : null,
+            CURLOPT_HTTP_VERSION => isset($options['http_version']) ? $options['http_version'] : null,
+            CURLOPT_HTTPHEADER => isset($options['http_header']) ? $options['http_header'] : null,
+            CURLOPT_TIMEOUT => isset($options['timeout']) ? $options['timeout'] : null,
+            CURLOPT_CONNECTTIMEOUT => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
+            CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : null,
 
             /* redirection */
-            CURLOPT_MAXREDIRS => isset($options['max_redirs']) ? $options['max_redirs'] : NULL,
-            CURLOPT_FOLLOWLOCATION => isset($options['follow_location']) ? $options['follow_location'] : NULL,
+            CURLOPT_MAXREDIRS => isset($options['max_redirs']) ? $options['max_redirs'] : null,
+            CURLOPT_FOLLOWLOCATION => isset($options['follow_location']) ? $options['follow_location'] : null,
         ];
 
+        // HTTP header
+        $user_http_header = isset($options['http_header']) ? $options['http_header'] : new CurlRequestHeader;
+        if ( is_array($user_http_header) ){
+            $user_http_header = new CurlRequestHeader($user_http_header);
+        }
+        elseif ( !($user_http_header instanceof CurlRequestHeader) ){
+            throw new GrasshopperException('invalid http header', Grasshopper::ERROR_INVALID_REQUEST_PARAMETER);
+        }
+        $user_curl_options[CURLOPT_HTTPHEADER] = $user_http_header->compile();
+
         // merge options between user and defaults
-        $real_options = array();
+        $real_options = [];
         foreach($dafaults as $k => $v){
             $user_val = isset($user_curl_options[$k]) ? $user_curl_options[$k] : null;
             $real_options[$k] = $user_val ? $user_val : $v;
@@ -129,7 +138,7 @@ class CurlRequest
     public function close(){
         if ( $this->ch ){
             curl_close($this->ch);
-            $this->ch = NULL;
+            $this->ch = null;
         }
     }
 

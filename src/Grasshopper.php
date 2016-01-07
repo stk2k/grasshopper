@@ -35,11 +35,11 @@ class Grasshopper
      *
      * @param array $options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         // callbacks
-        $this->complete_callback = isset($options['complete']) ? $options['complete'] : NULL;
-        $this->error_callback = isset($options['error']) ? $options['error'] : NULL;
+        $this->complete_callback = isset($options['complete']) ? $options['complete'] : null;
+        $this->error_callback = isset($options['error']) ? $options['error'] : null;
 
         if ( $this->complete_callback && !is_callable($this->complete_callback) ){
             throw new GrasshopperException('invalid complete callback', Grasshopper::ERROR_INVALID_REQUEST_PARAMETER);
@@ -50,13 +50,15 @@ class Grasshopper
 
         // options
         $dafaults = [
+            /* user customizable fields by options parameter */
             CURLMOPT_PIPELINING => 1,
             CURLMOPT_MAXCONNECTS => 10,
         ];
 
         $user_mcurl_options = [
-            CURLMOPT_PIPELINING => isset($options['pipelining']) ? $options['pipelining'] : NULL,
-            CURLMOPT_MAXCONNECTS => isset($options['max_connects']) ? $options['max_connects'] : NULL,
+            /* user customizable fields by options parameter */
+            CURLMOPT_PIPELINING => isset($options['pipelining']) ? $options['pipelining'] : null,
+            CURLMOPT_MAXCONNECTS => isset($options['max_connects']) ? $options['max_connects'] : null,
         ];
 
         // merge options between user and defaults
@@ -143,8 +145,7 @@ class Grasshopper
         if ( !$this->mh ){
             throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
         }
-        $result = array();
-
+        $result = [];
 
         do {
             $start = microtime(true);
@@ -253,11 +254,11 @@ REQUEST_FINISH:
                 $req->detach( $this->mh );
                 $req->close();
             }
-            $this->requests = NULL;
+            $this->requests = null;
         }
         if ( $this->mh ){
             curl_multi_close( $this->mh );
-            $this->mh = NULL;
+            $this->mh = null;
         }
     }
 

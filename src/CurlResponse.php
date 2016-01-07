@@ -207,10 +207,9 @@ class CurlResponse
             if ( preg_match( '@Content-Encoding:\s+([\w/+]+)@i', $h, $matches ) ){
                 $this->content_encoding = isset($matches[1]) ? strtolower($matches[1]) : null;
             }
-            if ( preg_match( '@Host:\s+([\w/:+]+)@i', $h, $matches ) ){
+            elseif ( preg_match( '@Host:\s+([\w/:+]+)@i', $h, $matches ) ){
                 $this->host = isset($matches[1]) ? strtolower($matches[1]) : null;
             }
-            echo "$h" . PHP_EOL;
         }
     }
 
