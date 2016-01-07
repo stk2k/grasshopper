@@ -6,7 +6,7 @@ use \Grasshopper\CurlResponse;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
-    public function testMultiRequest()
+    public function testWaitForAll()
     {
         $url = 'http://localhost:8000/test1.html';
 
