@@ -9,6 +9,7 @@
 namespace Grasshopper;
 
 use Grasshopper\curl\CurlRequest;
+use Grasshopper\util\Sanitizer;
 
 
 class HttpPostRequest extends CurlRequest
@@ -22,7 +23,7 @@ class HttpPostRequest extends CurlRequest
      */
     public function __construct($url, array $post_data, array $options = [])
     {
-        $options['post_fields'] = $post_data;
+        $options['post_fields'] = http_build_query(Sanitizer::removeControlChars($post_data));
         $options['post'] = true;
 
         parent::__construct( 'POST', $url, $options );

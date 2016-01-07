@@ -2,6 +2,7 @@
 namespace Grasshopper\curl;
 
 use Grasshopper\Grasshopper;
+use Grasshopper\util\Sanitizer;
 
 class CurlRequestHeader
 {
@@ -59,7 +60,7 @@ class CurlRequestHeader
     {
         $compiled = [];
         foreach( $this->headers as $k => $v ){
-            $compiled[$k] = $v;
+            $compiled[$k] = Sanitizer::removeControlChars($v);
         }
         return $compiled;
     }
