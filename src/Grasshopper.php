@@ -145,12 +145,12 @@ class Grasshopper
         }
         $result = array();
 
-        // wait for all responses
-        $start = microtime(true);
-        curl_multi_select($this->mh, $timeout);
-        $wait_left -= (microtime(true) - $start);
 
         do {
+            $start = microtime(true);
+            curl_multi_select($this->mh, $timeout);
+            $wait_left -= (microtime(true) - $start);
+
             $stat = curl_multi_exec($this->mh, $running);
             if ( $running ){
                 if ( $wait_left < $usleep ){
@@ -190,6 +190,8 @@ class Grasshopper
             $request_url = $req->getUrl();
 
             if ( $res['result'] !== CURLE_OK ){
+                $msg = curl_multi_strerror($res['result']);
+                echo "msg: $msg" . PHP_EOL;
                 goto REQUEST_FAILED;
             }
 

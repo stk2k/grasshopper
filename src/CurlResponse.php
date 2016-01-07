@@ -5,16 +5,28 @@ namespace Grasshopper;
 class CurlResponse
 {
     /** @var string */
-    private $request_url;
-
-    /** @var string */
-    private $url;
+    private $protocol;
 
     /** @var int */
     private $http_code;
 
     /** @var string */
+    private $reason_phrase;
+
+    /** @var string */
+    private $protocol_version;
+
+    /** @var string */
+    private $request_url;
+
+    /** @var string */
+    private $url;
+
+    /** @var string */
     private $content_type;
+
+    /** @var string */
+    private $host;
 
     /** @var string */
     private $effective_url;
@@ -31,6 +43,8 @@ class CurlResponse
     /** @var string */
     private $content_encoding;
 
+    /** @var int */
+    private $download_content_length;
 
     /**
      * Constructs grasshopper object
@@ -46,6 +60,7 @@ class CurlResponse
         $this->content_type = $info['content_type'];
         $this->url = $info['url'];
         $this->effective_url = $info['effective_url'];
+        $this->download_content_length = $info['download_content_length'];
 
         // get header from content
         $header = substr($content, 0, $info["header_size"]);
@@ -68,21 +83,48 @@ class CurlResponse
     }
 
     /**
+     * Get status code
+     *
+     * @return int
+     */
+    public function getStatusCode(){
+        return $this->http_code;
+    }
+
+    /**
+     * Get reason phrase
+     *
+     * @return string
+     */
+    public function getReasonPhrase(){
+        return $this->reason_phrase;
+    }
+
+    /**
+     * Get protocol
+     *
+     * @return string
+     */
+    public function getProtocol(){
+        return $this->protocol;
+    }
+
+    /**
+     * Get protocol version
+     *
+     * @return string
+     */
+    public function getProtocolVersion(){
+        return $this->protocol_version;
+    }
+
+    /**
      * Get request URL
      *
      * @return string
      */
     public function getRequestUrl(){
         return $this->request_url;
-    }
-
-    /**
-     * Get HTTP status code
-     *
-     * @return int
-     */
-    public function getStatusCode(){
-        return $this->http_code;
     }
 
     /**
@@ -148,11 +190,27 @@ class CurlResponse
     {
         $this->headers = array_filter(explode("\n",$header));
 
+        $status_line = isset($this->headers[0]) ? trim($this->headers[0]) : null;
+
+        if ( $status_line ){
+            $parts = explode(' ', $status_line);
+            $protocol_and_version = isset($parts[0]) ? $parts[0] : '';
+            $this->reason_phrase = isset($parts[2]) ? $parts[2] : '';
+
+            $p = strpos($protocol_and_version, '/');
+            $this->protocol = ($p !== false) ? substr($protocol_and_version,0,$p) : $protocol_and_version;
+            $this->protocol_version = ($p !== false) ? substr($protocol_and_version,$p+1) : '';
+        }
+
+
         foreach( $this->headers as $h ){
             if ( preg_match( '@Content-Encoding:\s+([\w/+]+)@i', $h, $matches ) ){
                 $this->content_encoding = isset($matches[1]) ? strtolower($matches[1]) : null;
             }
-
+            if ( preg_match( '@Host:\s+([\w/:+]+)@i', $h, $matches ) ){
+                $this->host = isset($matches[1]) ? strtolower($matches[1]) : null;
+            }
+            echo "$h" . PHP_EOL;
         }
     }
 
@@ -169,7 +227,7 @@ class CurlResponse
         preg_match( '@([\w/+]+)(;\s+charset=(\S+))?@i', $this->content_type, $matches );
         $charset = isset($matches[3]) ? $matches[3] : null;
 
-        $php_encoding = self::getPhpEncoding($this->charset);
+        $php_encoding = $charset ? self::getPhpEncoding($charset) : null;
         if ( !$php_encoding ){
             $html_encoded = mb_convert_encoding( strtolower($body), 'HTML-ENTITIES', 'UTF-8' );
             $doc = new \DOMDocument();

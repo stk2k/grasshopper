@@ -60,6 +60,9 @@ class CurlRequest
             CURLOPT_BUFFERSIZE => 1024,
             CURLOPT_RETURNTRANSFER => true,
 
+            /* SSL */
+            CURLOPT_SSL_VERIFYPEER => false,
+
             /* redirection */
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_FOLLOWLOCATION => true,
