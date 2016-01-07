@@ -1,5 +1,5 @@
 <?php
-namespace Grasshopper;
+namespace Grasshopper\curl;
 
 
 class CurlError

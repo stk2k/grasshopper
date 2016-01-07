@@ -1,6 +1,8 @@
 <?php
 namespace Grasshopper;
 
+use Grasshopper\curl\CurlRequest;
+
 class HttpGetRequest extends CurlRequest
 {
     /**

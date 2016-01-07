@@ -1,5 +1,5 @@
 <?php
-namespace Grasshopper;
+namespace Grasshopper\exception;
 
 class GrasshopperException extends \RuntimeException
 {

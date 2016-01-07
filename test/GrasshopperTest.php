@@ -3,7 +3,7 @@ namespace Grasshopper;
 
 use \Grasshopper\HttpGetRequest;
 use \Grasshopper\HttpPostRequest;
-use \Grasshopper\CurlResponse;
+use \Grasshopper\event\SuccessEvent;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
@@ -46,15 +46,15 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         //var_dump($result);
 
-        /** @var CurlResponse $res */
+        /** @var SuccessEvent $res */
         $res = $result[$url];
 
-        $this->assertEquals('Grasshopper\CurlResponse', get_class($res) );
+        $this->assertEquals('Grasshopper\event\SuccessEvent', get_class($res) );
 
-        //echo 'body:' . $res->getBody() . PHP_EOL;
+        echo 'body:' . $res->getResponse()->getBody() . PHP_EOL;
 
         $doc = new \DOMDocument();
-        @$doc->loadHTML($res->getBody());
+        @$doc->loadHTML($res->getResponse()->getBody());
 
         $xpath = new \DOMXpath( $doc );
 

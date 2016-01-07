@@ -1,5 +1,5 @@
 <?php
-namespace Grasshopper;
+namespace Grasshopper\exception;
 
 
 class TimeoutException extends GrasshopperException

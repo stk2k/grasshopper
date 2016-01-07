@@ -8,6 +8,8 @@
 
 namespace Grasshopper;
 
+use Grasshopper\curl\CurlRequest;
+
 
 class HttpPostRequest extends CurlRequest
 {

@@ -1,6 +1,11 @@
 <?php
-namespace Grasshopper;
+namespace Grasshopper\curl;
 
+use Grasshopper\Grasshopper;
+use Grasshopper\exception\GrasshopperException;
+use Grasshopper\HttpPostRequest;
+use Grasshopper\event\SuccessEvent;
+use Grasshopper\event\ErrorEvent;
 
 class CurlRequest
 {
@@ -75,6 +80,7 @@ class CurlRequest
             /* redirection */
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_AUTOREFERER => true,
         ];
 
         $user_curl_options = [
@@ -94,6 +100,7 @@ class CurlRequest
             /* redirection */
             CURLOPT_MAXREDIRS => isset($options['max_redirs']) ? $options['max_redirs'] : null,
             CURLOPT_FOLLOWLOCATION => isset($options['follow_location']) ? $options['follow_location'] : null,
+            CURLOPT_AUTOREFERER => isset($options['auto_referer']) ? $options['auto_referer'] : null,
         ];
 
         // HTTP header
@@ -161,24 +168,24 @@ class CurlRequest
     /**
      * Callback when the request is successfully done.
      *
-     * @param CurlResponse $response
+     * @param SuccessEvent $event
      */
-    public function onRequestSucceeded(CurlResponse $response)
+    public function onRequestSucceeded(SuccessEvent $event)
     {
         if ( $this->complete_callback ){
-            call_user_func_array( $this->complete_callback, [$response] );
+            call_user_func_array( $this->complete_callback, [$event] );
         }
     }
 
     /**
      * Callback when the request has failed.
      *
-     * @param CurlError $error
+     * @param ErrorEvent $event
      */
-    public function onRequestFailed(CurlError $error)
+    public function onRequestFailed(ErrorEvent $event)
     {
         if ( $this->error_callback ){
-            call_user_func_array( $this->error_callback, [$error] );
+            call_user_func_array( $this->error_callback, [$event] );
         }
     }
 

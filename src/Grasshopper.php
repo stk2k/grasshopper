@@ -1,6 +1,14 @@
 <?php
 namespace Grasshopper;
 
+use Grasshopper\exception\GrasshopperException;
+use Grasshopper\exception\TimeoutException;
+use Grasshopper\event\SuccessEvent;
+use Grasshopper\event\ErrorEvent;
+use Grasshopper\curl\CurlRequest;
+use Grasshopper\curl\CurlResponse;
+use Grasshopper\curl\CurlError;
+
 class Grasshopper
 {
     const MEMFILE_PROTOCOL_NAME = 'grasshopper';
@@ -125,9 +133,9 @@ class Grasshopper
         if ( !$this->mh ){
             throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
         }
-        foreach ( $requests as $req) {
-            $this->requests[] = $req;
-            curl_multi_add_handle($this->mh, $req->getCurlHandle());
+        foreach ( $requests as $request) {
+            $this->requests[] = $request;
+            curl_multi_add_handle($this->mh, $request->getCurlHandle());
         }
     }
 
@@ -184,11 +192,11 @@ class Grasshopper
             /** @var resource $ch */
             $ch = $res['handle'];
 
-            /** @var CurlRequest $req */
-            $req = $this->findRequestFromHandle($ch);
+            /** @var CurlRequest $request */
+            $request = $this->findRequestFromHandle($ch);
 
             /** @var string $url */
-            $request_url = $req->getUrl();
+            $request_url = $request->getUrl();
 
             if ( $res['result'] !== CURLE_OK ){
                 $msg = curl_multi_strerror($res['result']);
@@ -214,29 +222,31 @@ class Grasshopper
 REQUEST_SUCCEEDED:
             {
                 $response = new CurlResponse($request_url, $info, $content);
-                $req->onRequestSucceeded($response);
+                $event = new SuccessEvent($request, $response);
+                $request->onRequestSucceeded($event);
                 if ( $this->complete_callback ){
-                    call_user_func_array( $this->complete_callback, [$response] );
+                    call_user_func_array( $this->complete_callback, [$event] );
                 }
-                $result[$request_url] = $response;
+                $result[$request_url] = $event;
                 goto REQUEST_FINISH;
             }
 
 REQUEST_FAILED:
             {
                 $error = new CurlError($request_url, $ch);
-                $req->onRequestFailed($error);
+                $event = new ErrorEvent($request, $error);
+                $request->onRequestFailed($event);
                 if ( $this->error_callback ){
-                    call_user_func_array( $this->error_callback, [$error] );
+                    call_user_func_array( $this->error_callback, [$event] );
                 }
-                $result[$request_url] = $error;
+                $result[$request_url] = $event;
                 goto REQUEST_FINISH;
             }
 
 REQUEST_FINISH:
             {
                 curl_multi_remove_handle($this->mh, $ch);
-                $req->close();
+                $request->close();
             }
 
         } while ($remains);
@@ -250,9 +260,9 @@ REQUEST_FINISH:
     public function close()
     {
         if ( $this->requests ){
-            foreach( $this->requests as $req ){
-                $req->detach( $this->mh );
-                $req->close();
+            foreach( $this->requests as $request ){
+                $request->detach( $this->mh );
+                $request->close();
             }
             $this->requests = null;
         }
@@ -271,9 +281,9 @@ REQUEST_FINISH:
      */
     private function findRequestFromHandle($curl_handle)
     {
-        foreach($this->requests as $req){
-            if ( $req->getCurlHandle() === $curl_handle ){
-                return $req;
+        foreach($this->requests as $request){
+            if ( $request->getCurlHandle() === $curl_handle ){
+                return $request;
             }
         }
         throw new GrasshopperException('could not find request from handle', self::ERROR_FIND_REQUEST);

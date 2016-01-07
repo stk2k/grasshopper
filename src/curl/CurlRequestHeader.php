@@ -1,5 +1,7 @@
 <?php
-namespace Grasshopper;
+namespace Grasshopper\curl;
+
+use Grasshopper\Grasshopper;
 
 class CurlRequestHeader
 {
