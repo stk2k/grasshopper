@@ -188,7 +188,7 @@ class CurlResponse
         $status_line = isset($this->headers[0]) ? trim($this->headers[0]) : null;
 
         if ( $status_line ){
-            $parts = explode(' ', $status_line);
+            $parts = explode(' ', $status_line, 3);
             $protocol_and_version = isset($parts[0]) ? $parts[0] : '';
             $this->reason_phrase = isset($parts[2]) ? $parts[2] : '';
 
