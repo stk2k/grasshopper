@@ -23,7 +23,7 @@ class Grasshopper
     const ERROR_MALFORMED_URL = 9;
 
     const DEFAULT_USERAGENT = 'Grasshopper';
-    const DEFAULT_USLEEP = 100;
+    const DEFAULT_USLEEP = 20;
     const DEFAULT_WAIT_TMEOUT = 2;
 
     /** @var CurlRequest[] */
