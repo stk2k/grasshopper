@@ -48,7 +48,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         /** @var SuccessEvent $res */
         $res = $result[$url];
-        //var_dump($res);
+        var_dump($res);
 
         $this->assertEquals('Grasshopper\event\SuccessEvent', get_class($res) );
 
