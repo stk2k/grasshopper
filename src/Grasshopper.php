@@ -165,7 +165,6 @@ class Grasshopper
                 if ( $wait_left < $usleep ){
                     throw new TimeoutException();
                 }
-                echo "usleep($usleep) @curl_multi_exec" . PHP_EOL;
                 usleep($usleep);
                 $wait_left -= $usleep;
                 continue;
@@ -184,7 +183,6 @@ class Grasshopper
                 if ( $wait_left < $usleep ){
                     throw new TimeoutException();
                 }
-                echo "usleep($usleep) @curl_multi_info_read" . PHP_EOL;
                 usleep($usleep);
                 $wait_left -= $usleep;
                 $remains = 1;
