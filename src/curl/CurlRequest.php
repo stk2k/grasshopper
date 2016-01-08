@@ -24,6 +24,12 @@ class CurlRequest
     /** @var resource */
     private $ch;
 
+    /** @var resource */
+    private $tmpfile;
+
+    /** @var int */
+    private $max_download_size;
+
     /**
      * Constructs cURL request object
      *
@@ -42,6 +48,9 @@ class CurlRequest
             throw new GrasshopperException('malformed url', Grasshopper::ERROR_MALFORMED_URL);
         }
 
+        // method
+        $this->max_download_size = isset($options['max_download_size']) ? $options['max_download_size'] : Grasshopper::DEFAULT_MAX_DOWNLOAD_SIZE;
+
         // callbacks
         $this->complete_callback = isset($options['complete']) ? $options['complete'] : null;
         $this->error_callback = isset($options['error']) ? $options['error'] : null;
@@ -53,21 +62,23 @@ class CurlRequest
             throw new GrasshopperException('invalid error callback', Grasshopper::ERROR_INVALID_REQUEST_PARAMETER);
         }
 
+        $this->tmpfile = tmpfile();
+
         // options
         $dafaults = [
             /* user NOT customizable fields by options parameter */
             CURLOPT_URL => $url,
             CURLOPT_HEADER => true,
-            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_RETURNTRANSFER => false,
 
             /* user customizable fields by options parameter */
             CURLOPT_USERAGENT => Grasshopper::DEFAULT_USERAGENT,
             CURLOPT_PROXY => null,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_NONE,
             CURLOPT_HTTPHEADER => (new CurlRequestHeader)->compile(),
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_BUFFERSIZE => 1024,
+            CURLOPT_TIMEOUT => 400,
+            CURLOPT_CONNECTTIMEOUT => 0,
+            CURLOPT_BUFFERSIZE => Grasshopper::DEFAULT_BUFFER_SIZE,
 
             /* SSL */
             CURLOPT_SSL_VERIFYPEER => false,
@@ -81,6 +92,13 @@ class CurlRequest
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
+
+            /* file */
+            CURLOPT_FILE => $this->tmpfile,
+            CURLOPT_NOPROGRESS => false,
+            CURLOPT_PROGRESSFUNCTION => function($down_size, $downloaded, $upload_size, $uploaded){
+                return $downloaded > $this->max_download_size ? 1 : 0;
+            },
         ];
 
         $user_curl_options = [
@@ -142,6 +160,21 @@ class CurlRequest
      */
     public function getCurlHandle(){
         return $this->ch;
+    }
+
+    /**
+     * Get file handle
+     */
+    public function getFileHandle(){
+        return $this->tmpfile;
+    }
+
+    /**
+     * Get max download size
+     */
+    public function getMaxDownloadSize()
+    {
+        return $this->max_download_size;
     }
 
     /**

@@ -24,7 +24,9 @@ class Grasshopper
 
     const DEFAULT_USERAGENT = 'Grasshopper';
     const DEFAULT_USLEEP = 20;
-    const DEFAULT_WAIT_TMEOUT = 2;
+    const DEFAULT_WAIT_TMEOUT = 6000;
+    const DEFAULT_MAX_DOWNLOAD_SIZE = 104857600;       // 100MB
+    const DEFAULT_BUFFER_SIZE = 1048576;       // 1MB
 
     /** @var CurlRequest[] */
     private $requests;
@@ -38,6 +40,9 @@ class Grasshopper
     /** @var callable */
     private $error_callback;
 
+    /** @var int */
+    private $max_download_size;
+
     /**
      * Constructs grasshopper object
      *
@@ -48,6 +53,7 @@ class Grasshopper
         // callbacks
         $this->complete_callback = isset($options['complete']) ? $options['complete'] : null;
         $this->error_callback = isset($options['error']) ? $options['error'] : null;
+        $this->max_download_size = isset($options['max_download_size']) ? $options['max_download_size'] : self::DEFAULT_MAX_DOWNLOAD_SIZE;
 
         if ( $this->complete_callback && !is_callable($this->complete_callback) ){
             throw new GrasshopperException('invalid complete callback', Grasshopper::ERROR_INVALID_REQUEST_PARAMETER);
@@ -217,13 +223,18 @@ class Grasshopper
                 goto REQUEST_FAILED;
             }
             $info['effective_url'] = $effective_url;
-
+/*
             $content = curl_multi_getcontent($ch);
             if ( $content === false ){
                 $errno = curl_errno($ch);
                 $function = 'curl_multi_getcontent';
                 goto REQUEST_FAILED;
             }
+*/
+            $fp = $request->getFileHandle();
+            fseek($fp, 0);
+            $content =  fread($fp, $this->max_download_size);
+            fclose($fp);
 
 REQUEST_SUCCEEDED:
             {
@@ -258,6 +269,14 @@ REQUEST_FINISH:
         } while ($remains);
 
         return $result;
+    }
+
+    /**
+     * Get max download size
+     */
+    public function getMaxDownloadSize()
+    {
+        return $this->max_download_size;
     }
 
     /**

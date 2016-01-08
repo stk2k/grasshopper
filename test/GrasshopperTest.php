@@ -1,8 +1,6 @@
 <?php
 namespace Grasshopper;
 
-use \Grasshopper\HttpGetRequest;
-use \Grasshopper\HttpPostRequest;
 use \Grasshopper\event\SuccessEvent;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
@@ -36,31 +34,39 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
     public function testWaitForAll()
     {
-        $url = 'http://localhost:8000/test1.html';
-        $url = 'http://thisisassss.com/test1.html';
+        ini_set( 'memory_limit', -1 );
+
+        $url = 'http://localhost:8082/test1.html';
 
         $hopper = new Grasshopper();
 
-        $hopper->addRequest(new HttpGetRequest($url));
+        $options = [
+            'max_download_size' => 1048576,   // 1MB
+            ];
 
-        $result = $hopper->waitForAll(10,1);
+        $hopper->addRequest(new HttpGetRequest($url, $options));
+
+        $result = $hopper->waitForAll();
 
         //var_dump($result);
 
         /** @var SuccessEvent $res */
         $res = $result[$url];
-        var_dump($res);
+        //var_dump($res);
 
         $this->assertEquals('Grasshopper\event\SuccessEvent', get_class($res) );
 
-        //echo 'body:' . $res->getResponse()->getBody() . PHP_EOL;
+        $body = $res->getResponse()->getBody();
+
+        //echo "body: $body" . PHP_EOL;
 
         $doc = new \DOMDocument();
-        @$doc->loadHTML($res->getResponse()->getBody());
+        @$doc->loadHTML($body);
 
         $xpath = new \DOMXpath( $doc );
 
-        $title = $xpath->query('//head/title[1]')->item(0)->nodeValue;
+        $elements = $xpath->query('//head/title[1]');
+        $title = $elements->item(0)->nodeValue;
 
         $this->assertEquals('test data1', $title );
 

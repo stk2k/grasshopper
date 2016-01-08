@@ -1,1 +1,1 @@
-php -S localhost:8000 -t %cd%\..\html
+php -S localhost:8082 -t %cd%\..\html
