@@ -4,11 +4,11 @@ namespace Grasshopper\curl;
 
 class CurlError
 {
-    /** @var string */
-    private $request_url;
-
     /** @var  int */
     private $errno;
+
+    /** @var  string */
+    private $curl_function;
 
     /** @var  string */
     private $errmsg;
@@ -16,21 +16,14 @@ class CurlError
     /**
      * Constructs CurlError object
      *
-     * @param string $request_url
-     * @param resource $curl_handle
+     * @param int $errno
+     * @param string $curl_function
      */
-    public function __construct($request_url, $curl_handle)
+    public function __construct($errno, $curl_function)
     {
-        $this->request_url = $request_url;
-        $this->errno = curl_errno($curl_handle);
-        $this->errmsg = curl_strerror($this->errno);
-    }
-
-    /**
-     * Get URL
-     */
-    public function getRequestUrl(){
-        return $this->request_url;
+        $this->errno = $errno;
+        $this->curl_function = $curl_function;
+        $this->errmsg = curl_strerror($errno) . ': ' . $curl_function;;
     }
 
     /**
@@ -41,6 +34,16 @@ class CurlError
     public function getNumber()
     {
         return $this->errno;
+    }
+
+    /**
+     * Get function
+     *
+     * @return string
+     */
+    public function getFunction()
+    {
+        return $this->curl_function;
     }
 
     /**

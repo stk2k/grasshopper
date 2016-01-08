@@ -24,7 +24,7 @@ class Grasshopper
 
     const DEFAULT_USERAGENT = 'Grasshopper';
     const DEFAULT_USLEEP = 100;
-    const DEFAULT_WAIT_TMEOUT = 60;
+    const DEFAULT_WAIT_TMEOUT = 2;
 
     /** @var CurlRequest[] */
     private $requests;
@@ -157,7 +157,7 @@ class Grasshopper
 
         do {
             $start = microtime(true);
-            curl_multi_select($this->mh, $timeout);
+            curl_multi_select($this->mh);
             $wait_left -= (microtime(true) - $start);
 
             $stat = curl_multi_exec($this->mh, $running);
@@ -165,6 +165,7 @@ class Grasshopper
                 if ( $wait_left < $usleep ){
                     throw new TimeoutException();
                 }
+                echo "usleep($usleep) @curl_multi_exec" . PHP_EOL;
                 usleep($usleep);
                 $wait_left -= $usleep;
                 continue;
@@ -183,6 +184,7 @@ class Grasshopper
                 if ( $wait_left < $usleep ){
                     throw new TimeoutException();
                 }
+                echo "usleep($usleep) @curl_multi_info_read" . PHP_EOL;
                 usleep($usleep);
                 $wait_left -= $usleep;
                 $remains = 1;
@@ -199,29 +201,35 @@ class Grasshopper
             $request_url = $request->getUrl();
 
             if ( $res['result'] !== CURLE_OK ){
-                $msg = curl_multi_strerror($res['result']);
-                echo "msg: $msg" . PHP_EOL;
+                $errno = $res['result'];
+                $function = 'curl_multi_info_read';
                 goto REQUEST_FAILED;
             }
 
             $info = curl_getinfo($ch);
             if ( $info === false ){
+                $errno = curl_errno($ch);
+                $function = 'curl_getinfo';
                 goto REQUEST_FAILED;
             }
             $effective_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             if ( $effective_url === false ){
+                $errno = curl_errno($ch);
+                $function = 'curl_getinfo';
                 goto REQUEST_FAILED;
             }
             $info['effective_url'] = $effective_url;
 
             $content = curl_multi_getcontent($ch);
             if ( $content === false ){
+                $errno = curl_errno($ch);
+                $function = 'curl_multi_getcontent';
                 goto REQUEST_FAILED;
             }
 
 REQUEST_SUCCEEDED:
             {
-                $response = new CurlResponse($request_url, $info, $content);
+                $response = new CurlResponse($info, $content);
                 $event = new SuccessEvent($request, $response);
                 $request->onRequestSucceeded($event);
                 if ( $this->complete_callback ){
@@ -233,7 +241,7 @@ REQUEST_SUCCEEDED:
 
 REQUEST_FAILED:
             {
-                $error = new CurlError($request_url, $ch);
+                $error = new CurlError($errno, $function);
                 $event = new ErrorEvent($request, $error);
                 $request->onRequestFailed($event);
                 if ( $this->error_callback ){

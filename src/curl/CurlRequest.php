@@ -65,8 +65,8 @@ class CurlRequest
             CURLOPT_PROXY => null,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_NONE,
             CURLOPT_HTTPHEADER => (new CurlRequestHeader)->compile(),
-            CURLOPT_TIMEOUT => 60,
-            CURLOPT_CONNECTTIMEOUT => 60,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_BUFFERSIZE => 1024,
 
             /* SSL */

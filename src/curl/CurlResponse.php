@@ -17,9 +17,6 @@ class CurlResponse
     private $protocol_version;
 
     /** @var string */
-    private $request_url;
-
-    /** @var string */
     private $url;
 
     /** @var string */
@@ -49,13 +46,11 @@ class CurlResponse
     /**
      * Constructs grasshopper object
      *
-     * @param string $request_url
      * @param array $info
      * @param string $content
      */
-    public function __construct($request_url, array $info, $content)
+    public function __construct(array $info, $content)
     {
-        $this->request_url = $request_url;
         $this->http_code = $info['http_code'];
         $this->content_type = $info['content_type'];
         $this->url = $info['url'];
@@ -116,15 +111,6 @@ class CurlResponse
      */
     public function getProtocolVersion(){
         return $this->protocol_version;
-    }
-
-    /**
-     * Get request URL
-     *
-     * @return string
-     */
-    public function getRequestUrl(){
-        return $this->request_url;
     }
 
     /**

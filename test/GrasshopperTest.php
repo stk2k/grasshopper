@@ -37,17 +37,20 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
     public function testWaitForAll()
     {
         $url = 'http://localhost:8000/test1.html';
+        $url = 'http://nothingdomain.prg/test1.html';
+        $url = 'http://192.168.1.90/test1.html';
 
         $hopper = new Grasshopper();
 
         $hopper->addRequest(new HttpGetRequest($url));
 
-        $result = $hopper->waitForAll();
+        $result = $hopper->waitForAll(10,1);
 
         //var_dump($result);
 
         /** @var SuccessEvent $res */
         $res = $result[$url];
+        var_dump($res);
 
         $this->assertEquals('Grasshopper\event\SuccessEvent', get_class($res) );
 
