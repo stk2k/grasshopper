@@ -37,6 +37,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
     public function testWaitForAll()
     {
         $url = 'http://localhost:8000/test1.html';
+        $url = 'http://thisisassss.com/test1.html';
 
         $hopper = new Grasshopper();
 

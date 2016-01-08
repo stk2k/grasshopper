@@ -15,7 +15,7 @@ class Event
      */
     public function __construct($request)
     {
-        $this->requset = $request;
+        $this->request = $request;
     }
 
     /**
