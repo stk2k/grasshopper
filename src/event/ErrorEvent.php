@@ -6,6 +6,9 @@ use Grasshopper\curl\CurlError;
 
 class ErrorEvent extends Event
 {
+    /** @var CurlError|null */
+    private $error;
+
     /**
      * Constructs Event object
      *
@@ -14,6 +17,16 @@ class ErrorEvent extends Event
      */
     public function __construct(CurlRequest $request, CurlError $error)
     {
-        parent::__construct($request,null,$error);
+        parent::__construct($request);
+
+        $this->error = $error;
+    }
+
+    /**
+     * get error object
+     */
+    public function getError()
+    {
+        return $this->error;
     }
 }
