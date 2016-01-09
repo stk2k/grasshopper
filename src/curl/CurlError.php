@@ -1,8 +1,9 @@
 <?php
 namespace Grasshopper\curl;
 
+use Grasshopper\Error;
 
-class CurlError
+class CurlError implements Error
 {
     const CATEGORY_CURL = 'curl';
     const CATEGORY_CURL_MULTI = 'curl_m';
@@ -114,26 +115,22 @@ class CurlError
     private $errno;
 
     /** @var  string */
-    private $curl_function;
+    private $function;
 
     /** @var  string */
-    private $errmsg;
-
-    /** @var  string */
-    private $category;
+    private $message;
 
     /**
      * Constructs CurlError object
      *
      * @param int $errno
-     * @param string $curl_function
+     * @param string $function
      */
-    public function __construct($errno, $curl_function)
+    public function __construct($errno, $function)
     {
         $this->errno = $errno;
-        $this->curl_function = $curl_function;
-        $this->category = self::detectCategory($curl_function);
-        $this->errmsg = '[' . $this->category . ']' . curl_strerror($errno) . ': ' . $curl_function;;
+        $this->function = $function;
+        $this->message = "[$function]" . curl_strerror($errno);
     }
 
     /**
@@ -141,7 +138,7 @@ class CurlError
      *
      * @return int
      */
-    public function getNumber()
+    public function getNo()
     {
         return $this->errno;
     }
@@ -153,7 +150,7 @@ class CurlError
      */
     public function getFunction()
     {
-        return $this->curl_function;
+        return $this->function;
     }
 
     /**
@@ -163,179 +160,7 @@ class CurlError
      */
     public function getMessage()
     {
-        return $this->errmsg;
+        return $this->message;
     }
 
-    /**
-     * Get error category
-     *
-     * @return string
-     */
-    public function getCategory()
-    {
-        return $this->category;
-    }
-
-    /**
-     * Detect category from function
-     *
-     * @param string $function
-     *
-     * @return string
-     */
-    private static function detectCategory($function)
-    {
-        static $defs = [
-            'curl_close' => self::CATEGORY_CURL,
-            'curl_copy_handle' => self::CATEGORY_CURL,
-            'curl_errno' => self::CATEGORY_CURL,
-            'curl_error' => self::CATEGORY_CURL,
-            'curl_escape' => self::CATEGORY_CURL,
-            'curl_exec' => self::CATEGORY_CURL,
-            'curl_file_create' => self::CATEGORY_CURL,
-            'curl_getinfo' => self::CATEGORY_CURL,
-            'curl_init' => self::CATEGORY_CURL,
-            'curl_multi_add_handle' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_close' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_exec' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_getcontent' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_info_read' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_init' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_remove_handle' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_select' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_setopt' => self::CATEGORY_CURL_MULTI,
-            'curl_multi_strerror' => self::CATEGORY_CURL_MULTI,
-            'curl_pause' => self::CATEGORY_CURL,
-            'curl_reset' => self::CATEGORY_CURL,
-            'curl_setopt_array' => self::CATEGORY_CURL,
-            'curl_setopt' => self::CATEGORY_CURL,
-            'curl_share_close' => self::CATEGORY_CURL_SHARE,
-            'curl_share_init' => self::CATEGORY_CURL_SHARE,
-            'curl_share_setopt' => self::CATEGORY_CURL_SHARE,
-            'curl_strerror' => self::CATEGORY_CURL,
-            'curl_unescape' => self::CATEGORY_CURL,
-            'curl_version' => self::CATEGORY_CURL,
-        ];
-        return isset($defs[$function]) ? $defs[$function] : '';
-    }
-    
-    /**
-     * Get cURL error code string
-     *
-     * @param string $category
-     * @param string $errno
-     *
-     * @return string
-     */
-    private static function getErrorCodeString($category, $errno)
-    {
-        /* CURLcode */
-        static $defs = [
-            self::CATEGORY_CURL => [
-                self::E_OK => 'E_OK',
-                self::E_UNSUPPORTED_PROTOCOL => 'E_OK',
-                self::E_FAILED_INIT => 'E_OK',
-                self::E_URL_MALFORMAT => 'E_OK',
-                self::E_NOT_BUILT_IN => 'E_OK',
-                self::E_COULDNT_RESOLVE_PROXY => 'E_OK',
-                self::E_COULDNT_RESOLVE_HOST => 'E_OK',
-                self::E_COULDNT_CONNECT => 'E_OK',
-                self::E_FTP_WEIRD_SERVER_REPLY => 'E_OK',
-                self::E_REMOTE_ACCESS_DENIED => 'E_OK',
-                self::E_FTP_ACCEPT_FAILED => 'E_OK',
-                self::E_FTP_WEIRD_PASS_REPLY => 'E_OK',
-                self::E_FTP_ACCEPT_TIMEOUT => 'E_OK',
-                self::E_FTP_WEIRD_PASV_REPLY => 'E_OK',
-                self::E_FTP_WEIRD_227_FORMAT => 'E_OK',
-                self::E_FTP_CANT_GET_HOST => 'E_OK',
-                self::E_HTTP2 => 'E_OK',
-                self::E_FTP_COULDNT_SET_TYPE => 'E_OK',
-                self::E_PARTIAL_FILE => 'E_OK',
-                self::E_FTP_COULDNT_RETR_FILE => 'E_OK',
-                self::E_QUOTE_ERROR => 'E_OK',
-                self::E_HTTP_RETURNED_ERROR => 'E_OK',
-                self::E_WRITE_ERROR => 'E_OK',
-                self::E_UPLOAD_FAILED => 'E_OK',
-                self::E_READ_ERROR => 'E_OK',
-                self::E_OUT_OF_MEMORY => 'E_OK',
-                self::E_OPERATION_TIMEDOUT => 'E_OK',
-                self::E_FTP_PORT_FAILED => 'E_OK',
-                self::E_FTP_COULDNT_USE_REST => 'E_OK',
-                self::E_RANGE_ERROR => 'E_OK',
-                self::E_HTTP_POST_ERROR => 'E_OK',
-                self::E_SSL_CONNECT_ERROR => 'E_OK',
-                self::E_BAD_DOWNLOAD_RESUME => 'E_OK',
-                self::E_FILE_COULDNT_READ_FILE => 'E_OK',
-                self::E_LDAP_CANNOT_BIND => 'E_OK',
-                self::E_LDAP_SEARCH_FAILED => 'E_OK',
-                self::E_FUNCTION_NOT_FOUND => 'E_OK',
-                self::E_ABORTED_BY_CALLBACK => 'E_OK',
-                self::E_BAD_FUNCTION_ARGUMENT => 'E_OK',
-                self::E_INTERFACE_FAILED => 'E_OK',
-                self::E_TOO_MANY_REDIRECTS => 'E_OK',
-                self::E_UNKNOWN_OPTION => 'E_OK',
-                self::E_TELNET_OPTION_SYNTAX => 'E_OK',
-                self::E_PEER_FAILED_VERIFICATION => 'E_OK',
-                self::E_GOT_NOTHING  => 'E_OK',
-                self::E_SSL_ENGINE_NOTFOUND => 'E_OK',
-                self::E_SSL_ENGINE_SETFAILED => 'E_OK',
-                self::E_SEND_ERROR  => 'E_OK',
-                self::E_RECV_ERROR => 'E_OK',
-                self::E_SSL_CERTPROBLEM => 'E_OK',
-                self::E_SSL_CIPHER => 'E_OK',
-                self::E_SSL_CACERT  => 'E_OK',
-                self::E_BAD_CONTENT_ENCODING => 'E_OK',
-                self::E_LDAP_INVALID_URL => 'E_OK',
-                self::E_FILESIZE_EXCEEDED => 'E_OK',
-                self::E_USE_SSL_FAILED => 'E_OK',
-                self::E_SEND_FAIL_REWIND => 'E_OK',
-                self::E_SSL_ENGINE_INITFAILED => 'E_OK',
-                self::E_LOGIN_DENIED => 'E_OK',
-                self::E_TFTP_NOTFOUND => 'E_OK',
-                self::E_TFTP_PERM => 'E_OK',
-                self::E_REMOTE_DISK_FULL => 'E_OK',
-                self::E_TFTP_ILLEGAL => 'E_OK',
-                self::E_TFTP_UNKNOWNID => 'E_OK',
-                self::E_REMOTE_FILE_EXISTS => 'E_OK',
-                self::E_TFTP_NOSUCHUSER => 'E_OK',
-                self::E_CONV_FAILED => 'E_OK',
-                self::E_CONV_REQD  => 'E_OK',
-                self::E_SSL_CACERT_BADFILE => 'E_OK',
-                self::E_REMOTE_FILE_NOT_FOUND => 'E_OK',
-                self::E_SSH => 'E_OK',
-                self::E_SSL_SHUTDOWN_FAILED => 'E_OK',
-                self::E_SSL_CRL_BADFILE => 'E_OK',
-                self::E_SSL_ISSUER_ERROR => 'E_OK',
-                self::E_FTP_PRET_FAILED => 'E_OK',
-                self::E_RTSP_CSEQ_ERROR => 'E_OK',
-                self::E_RTSP_SESSION_ERROR => 'E_OK',
-                self::E_FTP_BAD_FILE_LIST => 'E_OK',
-                self::E_CHUNK_FAILED => 'E_OK',
-                self::E_NO_CONNECTION_AVAILABLE => 'E_OK',
-                self::E_SSL_PINNEDPUBKEYNOTMATCH  => 'E_OK',
-                self::E_SSL_INVALIDCERTSTATUS => 'E_OK',
-            ],
-            /* CURLMcode */
-            self::CATEGORY_CURL_MULTI => [
-                self::M_OK => 'E_OK',
-                self::M_BAD_HANDLE  => 'E_OK',
-                self::M_BAD_EASY_HANDLE  => 'E_OK',
-                self::M_OUT_OF_MEMORY => 'E_OK',
-                self::M_INTERNAL_ERROR => 'E_OK',
-                self::M_BAD_SOCKET => 'E_OK',
-                self::M_UNKNOWN_OPTION => 'E_OK',
-                self::M_ADDED_ALREADY => 'E_OK',
-            ],
-            /* CURLSHcode */
-            self::CATEGORY_CURL_SHARE => [
-                self::SHE_OK  => 'E_OK',
-                self::SHE_BAD_OPTION => 'E_OK',
-                self::SHE_IN_USE => 'E_OK',
-                self::SHE_INVALID => 'E_OK',
-                self::SHE_NOMEM => 'E_OK',
-                self::SHE_NOT_BUILT_IN => 'E_OK',
-            ],
-        ];
-        return isset($defs[$category][$errno]) ? $defs[$category][$errno] : '';
-    }
 }

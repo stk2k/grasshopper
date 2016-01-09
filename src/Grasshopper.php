@@ -8,6 +8,7 @@ use Grasshopper\event\ErrorEvent;
 use Grasshopper\curl\CurlRequest;
 use Grasshopper\curl\CurlResponse;
 use Grasshopper\curl\CurlError;
+use Grasshopper\http\HttpError;
 
 class Grasshopper
 {
@@ -195,6 +196,8 @@ class Grasshopper
                 continue;
             }
 
+            $response = null;
+
             /** @var resource $ch */
             $ch = $res['handle'];
 
@@ -207,6 +210,7 @@ class Grasshopper
             if ( $res['result'] !== CURLE_OK ){
                 $errno = $res['result'];
                 $function = 'curl_multi_info_read';
+                $error = new CurlError($errno, $function);
                 goto REQUEST_FAILED;
             }
 
@@ -214,23 +218,18 @@ class Grasshopper
             if ( $info === false ){
                 $errno = curl_errno($ch);
                 $function = 'curl_getinfo';
+                $error = new CurlError($errno, $function);
                 goto REQUEST_FAILED;
             }
             $effective_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             if ( $effective_url === false ){
                 $errno = curl_errno($ch);
                 $function = 'curl_getinfo';
+                $error = new CurlError($errno, $function);
                 goto REQUEST_FAILED;
             }
             $info['effective_url'] = $effective_url;
-/*
-            $content = curl_multi_getcontent($ch);
-            if ( $content === false ){
-                $errno = curl_errno($ch);
-                $function = 'curl_multi_getcontent';
-                goto REQUEST_FAILED;
-            }
-*/
+
             $fp = $request->getFileHandle();
             fseek($fp, 0);
             $content =  fread($fp, $this->max_download_size);
@@ -240,6 +239,14 @@ REQUEST_SUCCEEDED:
             {
                 $response = new CurlResponse($info, $content);
                 $event = new SuccessEvent($request, $response);
+                // make HttpError when status code >= 300
+                if ( $response->getStatusCode() >= 300 ){
+                    $errno = $response->getStatusCode();
+                    $message = $response->getReasonPhrase();
+                    $error = new HttpError($errno, $message);
+                    goto REQUEST_FAILED;
+                }
+                // callback
                 $request->onRequestSucceeded($event);
                 if ( $this->complete_callback ){
                     call_user_func_array( $this->complete_callback, [$event] );
@@ -250,8 +257,8 @@ REQUEST_SUCCEEDED:
 
 REQUEST_FAILED:
             {
-                $error = new CurlError($errno, $function);
-                $event = new ErrorEvent($request, $error);
+                $event = new ErrorEvent($request, $error, $response);
+                // callback
                 $request->onRequestFailed($event);
                 if ( $this->error_callback ){
                     call_user_func_array( $this->error_callback, [$event] );

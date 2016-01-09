@@ -41,7 +41,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         $hopper = new Grasshopper();
 
         $options = [
-            'max_download_size' => 1048576,   // 1MB
+            'max_download_size' => 10485760,   // 10MB
             ];
 
         $hopper->addRequest(new HttpGetRequest($url, $options));
