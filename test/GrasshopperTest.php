@@ -2,6 +2,7 @@
 namespace Grasshopper;
 
 use \Grasshopper\event\SuccessEvent;
+use \Grasshopper\event\ErrorEvent;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
@@ -30,6 +31,29 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         );
 
         $this->assertEquals(2, count($hopper->getRequests()) );
+    }
+
+    public function testSample(){
+        $hopper = new Grasshopper();
+
+        $url = 'http://www.example.org/';
+
+        $hopper->addRequest(new HttpGetRequest($url));
+
+        $result = $hopper->waitForAll();
+
+        $res = $result[$url];
+        if ( $res instanceof SuccessEvent ){
+            // success
+            $status = $res->getResponse()->getStatusCode();
+            $body = $res->getResponse()->getBody();
+            echo "success: status=$status" . PHP_EOL;
+            echo $body . PHP_EOL;
+        }
+        elseif ( $res instanceof ErrorEvent ){
+            // error
+            echo "error: " . $res->getError()->getMessage() . PHP_EOL;
+        }
     }
 
     public function testWaitForAll()

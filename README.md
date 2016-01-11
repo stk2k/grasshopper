@@ -8,7 +8,7 @@ requests.
 ```php
     $hopper = new Grasshopper();
 
-    $url = 'http://httpbin.org';
+    $url = 'http://www.example.org/';
 
     $hopper->addRequest(new HttpGetRequest($url));
 
