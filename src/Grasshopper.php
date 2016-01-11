@@ -3,6 +3,7 @@ namespace Grasshopper;
 
 use Grasshopper\exception\GrasshopperException;
 use Grasshopper\exception\TimeoutException;
+use Grasshopper\exception\UserCancelException;
 use Grasshopper\event\SuccessEvent;
 use Grasshopper\event\ErrorEvent;
 use Grasshopper\curl\CurlRequest;
@@ -24,7 +25,7 @@ class Grasshopper
     const ERROR_MALFORMED_URL = 9;
 
     const DEFAULT_USERAGENT = 'Grasshopper';
-    const DEFAULT_USLEEP = 20;
+    const DEFAULT_SLEEP_WAIT = 20;
     const DEFAULT_WAIT_TMEOUT = 6000;
     const DEFAULT_MAX_DOWNLOAD_SIZE = 104857600;       // 100MB
     const DEFAULT_BUFFER_SIZE = 1048576;       // 1MB
@@ -149,31 +150,53 @@ class Grasshopper
     /**
      * wait for all responses
      *
-     * @param int $usleep
-     * @param int $timeout
+     * $wait_function indicates like this:
+     *
+     * function wait_func($total_wait, $function){
+     *     // $total_wait: total wait time in msec
+     *     // $function: function name which needs wait
+     *     // return value: if you want to break waitForAll, return true.
+     *     if ( $total_wait > 2000 )    return true;   // will cancel waitForAll(throws UserCancelException)
+     *     usleep(20);
+     *     return false;    // continue execution of waitForAll
+     * }
+     *
+     * @param callable $wait_function    user defined wait function.if this set to null, default wait ant default
+     *                                   timeout will be applied.
      *
      * @return array
+     *
+     * @throws UserCancelException
      */
-    public function waitForAll($usleep = self::DEFAULT_USLEEP, $timeout = self::DEFAULT_WAIT_TMEOUT)
+    public function waitForAll($wait_function = null)
     {
-        $wait_left = (float)($timeout) * 1000;
         if ( !$this->mh ){
             throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
         }
         $result = [];
 
+        $total_wait = 0;
+
         do {
-            $start = microtime(true);
             curl_multi_select($this->mh);
-            $wait_left -= (microtime(true) - $start);
 
             $stat = curl_multi_exec($this->mh, $running);
             if ( $running ){
-                if ( $wait_left < $usleep ){
-                    throw new TimeoutException();
+                $start = microtime(true);
+                if ( $wait_function && is_callable($wait_function) ){
+                    $canceled = call_user_func_array($wait_function, [$total_wait, 'curl_multi_exec']);
+                    if ( $canceled ){
+                        throw new UserCancelException();
+                    }
                 }
-                usleep($usleep);
-                $wait_left -= $usleep;
+                else{
+                    // default wait
+                    if ( $total_wait + self::DEFAULT_SLEEP_WAIT > self::DEFAULT_WAIT_TMEOUT ){
+                        throw new TimeoutException();
+                    }
+                    usleep(self::DEFAULT_SLEEP_WAIT);
+                }
+                $total_wait += (microtime(true) - $start);
                 continue;
             }
         } while ($stat === CURLM_CALL_MULTI_PERFORM || $running);
@@ -187,11 +210,21 @@ class Grasshopper
         do {
             $res = curl_multi_info_read($this->mh, $remains);
             if ( !$res ) {
-                if ( $wait_left < $usleep ){
-                    throw new TimeoutException();
+                $start = microtime(true);
+                if ( $wait_function && is_callable($wait_function) ){
+                    $canceled = call_user_func_array($wait_function, [$total_wait, 'curl_multi_info_read']);
+                    if ( $canceled ){
+                        throw new UserCancelException();
+                    }
                 }
-                usleep($usleep);
-                $wait_left -= $usleep;
+                else{
+                    // default wait
+                    if ( $total_wait + self::DEFAULT_SLEEP_WAIT > self::DEFAULT_WAIT_TMEOUT ){
+                        throw new TimeoutException();
+                    }
+                    usleep(self::DEFAULT_SLEEP_WAIT);
+                }
+                $total_wait += (microtime(true) - $start);
                 $remains = 1;
                 continue;
             }
