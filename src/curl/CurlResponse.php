@@ -1,6 +1,7 @@
 <?php
 namespace Grasshopper\curl;
 
+use Grasshopper\exception\DeflateException;
 
 class CurlResponse
 {
@@ -48,6 +49,7 @@ class CurlResponse
      *
      * @param array $info
      * @param string $content
+     * @throws DeflateException
      */
     public function __construct(array $info, $content)
     {
@@ -275,7 +277,11 @@ class CurlResponse
             case 'gzip':
             case 'deflate':
             case 'compress':
-                return zlib_decode($body);
+                $body = @zlib_decode($body);
+                if ( $body === FALSE ){
+                    throw new DeflateException();
+                }
+                return $body;
                 break;
             default:
                 return $body;

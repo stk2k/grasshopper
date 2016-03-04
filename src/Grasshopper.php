@@ -4,6 +4,7 @@ namespace Grasshopper;
 use Grasshopper\exception\GrasshopperException;
 use Grasshopper\exception\TimeoutException;
 use Grasshopper\exception\UserCancelException;
+use Grasshopper\exception\DeflateException;
 use Grasshopper\event\SuccessEvent;
 use Grasshopper\event\ErrorEvent;
 use Grasshopper\curl\CurlRequest;
@@ -270,7 +271,14 @@ class Grasshopper
 
 REQUEST_SUCCEEDED:
             {
-                $response = new CurlResponse($info, $content);
+                $response = null;
+                try{
+                    $response = new CurlResponse($info, $content);
+                }
+                catch( DeflateException $ex ){
+                    $error = new HttpError(0, 'failed to deflate');
+                    goto REQUEST_FAILED;
+                }
                 $event = new SuccessEvent($request, $response);
                 // make HttpError when status code >= 300
                 if ( $response->getStatusCode() >= 300 ){
