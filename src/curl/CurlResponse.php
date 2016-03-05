@@ -75,8 +75,9 @@ class CurlResponse
         // detect character encoding
         $this->charset = $this->detectCharset($body);
 
-        // convert body encoding to utf8
-        $this->body = $this->charset ? $this->convertBody($body, $this->charset) : $body;
+        // convert body and reason phrase encoding to utf8
+        $this->body = $this->charset ? $this->convertEncoding($body, $this->charset) : $body;
+        $this->reason_phrase = $this->charset ? $this->convertEncoding($this->reason_phrase, $this->charset) : $this->reason_phrase;
     }
 
     /**
@@ -344,19 +345,19 @@ class CurlResponse
     }
 
     /**
-     * Convert body encoding
-     * @param $body
-     * @param $html_charset
+     * Convert encoding
+     * @param string $str
+     * @param string $html_charset
      * @param string $to_encoding
      * @return array
      */
-    private static function convertBody( $body, $html_charset, $to_encoding = 'UTF-8' )
+    private static function convertEncoding( $str, $html_charset, $to_encoding = 'UTF-8' )
     {
         $php_encoding = self::getPhpEncoding($html_charset);
         $from_encoding = $php_encoding ? $php_encoding : 'auto';
 
-        $body = ( $from_encoding == $to_encoding ) ? $body : mb_convert_encoding( $body, $to_encoding, $from_encoding );
+        $str = ( $from_encoding == $to_encoding ) ? $str : mb_convert_encoding( $str, $to_encoding, $from_encoding );
 
-        return $body;
+        return $str;
     }
 }
