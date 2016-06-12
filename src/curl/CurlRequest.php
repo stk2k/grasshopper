@@ -40,7 +40,7 @@ class CurlRequest
     public function __construct($method, $url, array $options = [])
     {
         // method
-        $this->method = $method;
+        $this->method = strtoupper(trim($method));
 
         // URL
         $this->url = $url;
@@ -85,7 +85,6 @@ class CurlRequest
             CURLOPT_SSL_VERIFYHOST => false,
 
             /* HTTP/POST */
-            CURLOPT_POST => false,
             CURLOPT_POSTFIELDS => '',
 
             /* redirection */
@@ -146,6 +145,10 @@ class CurlRequest
 
         // set options to curl handle
         curl_setopt_array($this->ch, $real_options);
+
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->method);
+        curl_setopt($this->ch, CURLOPT_VERBOSE, isset($options['verbose']) ? $options['verbose'] : false);
+        curl_setopt($this->ch, CURLOPT_STDERR, isset($options['stderr']) ? $options['stderr'] : STDERR);
     }
 
     /**
