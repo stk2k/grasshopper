@@ -280,13 +280,6 @@ REQUEST_SUCCEEDED:
                     goto REQUEST_FAILED;
                 }
                 $event = new SuccessEvent($request, $response);
-                // make HttpError when status code >= 300
-                if ( $response->getStatusCode() >= 300 ){
-                    $errno = $response->getStatusCode();
-                    $message = $response->getReasonPhrase();
-                    $error = new HttpError($errno, $message);
-                    goto REQUEST_FAILED;
-                }
                 // callback
                 $request->onRequestSucceeded($event);
                 if ( $this->complete_callback ){

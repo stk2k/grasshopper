@@ -6,6 +6,15 @@ use \Grasshopper\event\ErrorEvent;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
+    const LOCAL_PORT = '8082';
+
+    private $url_base;
+
+    protected function setUp()
+    {
+        $this->url_base = 'http://localhost:' . self::LOCAL_PORT;
+    }
+
     public function testAddRequest()
     {
         $hopper = new Grasshopper();
@@ -25,42 +34,61 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $hopper->addRequests(
             [
-                new HttpGetRequest('http://localhost:8000/test1.html'),
-                new HttpGetRequest('http://localhost:8000/test1.html'),
+                new HttpGetRequest($this->url_base . '/test1.html'),
+                new HttpGetRequest($this->url_base . '/test1.html'),
             ]
         );
 
         $this->assertEquals(2, count($hopper->getRequests()) );
     }
 
-    public function testSample(){
+    public function test200(){
         $hopper = new Grasshopper();
 
-        $url = 'http://www.example.org/';
+        $url = $this->url_base . '/test1.html';
 
         $hopper->addRequest(new HttpGetRequest($url));
 
         $result = $hopper->waitForAll();
 
+        $this->assertEquals(1, count($result) );
+        $this->assertEquals(true, isset($result[$url]) );
+
         $res = $result[$url];
-        if ( $res instanceof SuccessEvent ){
-            // success
-            $status = $res->getResponse()->getStatusCode();
-            $body = $res->getResponse()->getBody();
-            echo "success: status=$status" . PHP_EOL;
-            echo $body . PHP_EOL;
-        }
-        elseif ( $res instanceof ErrorEvent ){
-            // error
-            echo "error: " . $res->getError()->getMessage() . PHP_EOL;
-        }
+
+        $this->assertEquals(true, $res instanceof SuccessEvent );
+
+        $status = $res->getResponse()->getStatusCode();
+
+        $this->assertEquals(200, $status );
+    }
+
+    public function test404(){
+        $hopper = new Grasshopper();
+
+        $url = $this->url_base . '/404.html';
+
+        $hopper->addRequest(new HttpGetRequest($url));
+
+        $result = $hopper->waitForAll();
+
+        $this->assertEquals(1, count($result) );
+        $this->assertEquals(true, isset($result[$url]) );
+
+        $res = $result[$url];
+
+        $this->assertEquals(true, $res instanceof SuccessEvent );
+
+        $status = $res->getResponse()->getStatusCode();
+
+        $this->assertEquals(404, $status );
     }
 
     public function testWaitForAll()
     {
         ini_set( 'memory_limit', -1 );
 
-        $url = 'http://localhost:8082/test1.html';
+        $url = $this->url_base . '/test1.html';
 
         $hopper = new Grasshopper();
 
