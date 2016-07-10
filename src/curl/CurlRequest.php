@@ -100,6 +100,11 @@ class CurlRequest
             },
         ];
 
+        /** TCP Fast Open */
+        if ( defined('CURLOPT_TCP_FASTOPEN') ){
+            $dafaults[CURLOPT_TCP_FASTOPEN] = true;
+        }
+
         $user_curl_options = [
             /* user customizable fields by options parameter */
             CURLOPT_USERAGENT => isset($options['user_agent']) ? $options['user_agent'] : null,
