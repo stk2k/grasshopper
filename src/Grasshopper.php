@@ -105,6 +105,8 @@ class Grasshopper
 
     /**
      * Reset object
+     *
+     * @return Grasshopper
      */
     public function reset()
     {
@@ -124,6 +126,8 @@ class Grasshopper
 
     /**
      * Get max download size
+     *
+     * @return integer
      */
     public function getMaxDownloadSize()
     {
@@ -136,7 +140,7 @@ class Grasshopper
      * @param string $url
      * @param array $options
      *
-     * @return resource
+     * @return Grasshopper
      *
      * @throws \InvalidArgumentException
      */
@@ -159,7 +163,7 @@ class Grasshopper
      *
      * @param CurlRequest[] $requests
      *
-     * @return resource
+     * @return Grasshopper
      */
     public function addRequests(array $requests)
     {
