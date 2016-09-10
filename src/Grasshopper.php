@@ -109,6 +109,7 @@ class Grasshopper
     public function reset()
     {
         $this->requests = array();
+        return $this;
     }
 
     /**
@@ -122,6 +123,14 @@ class Grasshopper
     }
 
     /**
+     * Get max download size
+     */
+    public function getMaxDownloadSize()
+    {
+        return $this->max_download_size;
+    }
+
+    /**
      * Add request
      *
      * @param CurlRequest $request
@@ -131,6 +140,7 @@ class Grasshopper
     public function addRequest(CurlRequest $request)
     {
         $this->requests[] = $request;
+        return $this;
     }
 
     /**
@@ -145,6 +155,7 @@ class Grasshopper
         foreach ( $requests as $request) {
             $this->requests[] = $request;
         }
+        return $this;
     }
 
     /**
@@ -321,14 +332,6 @@ REQUEST_FINISH:
         $mh->close();
 
         return $result;
-    }
-
-    /**
-     * Get max download size
-     */
-    public function getMaxDownloadSize()
-    {
-        return $this->max_download_size;
     }
 
 }
