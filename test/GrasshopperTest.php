@@ -2,7 +2,7 @@
 namespace Grasshopper;
 
 use \Grasshopper\event\SuccessEvent;
-use \Grasshopper\event\ErrorEvent;
+use \Grasshopper\curl\CurlHandlePool;
 
 class GrasshopperTest extends \PhpUnit_Framework_TestCase
 {
@@ -42,6 +42,22 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         $this->assertEquals(2, count($hopper->getRequests()) );
     }
 
+    public function testReset()
+    {
+        $hopper = new Grasshopper();
+
+        $hopper->addRequests(
+            [
+                new HttpGetRequest($this->url_base . '/test1.html'),
+                new HttpGetRequest($this->url_base . '/test1.html'),
+            ]
+        );
+
+        $hopper->reset();
+
+        $this->assertEquals(0, count($hopper->getRequests()) );
+    }
+
     public function test200(){
         $hopper = new Grasshopper();
 
@@ -54,6 +70,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         $this->assertEquals(1, count($result) );
         $this->assertEquals(true, isset($result[$url]) );
 
+        /** @var SuccessEvent $res */
         $res = $result[$url];
 
         $this->assertEquals(true, $res instanceof SuccessEvent );
@@ -75,6 +92,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         $this->assertEquals(1, count($result) );
         $this->assertEquals(true, isset($result[$url]) );
 
+        /** @var SuccessEvent $res */
         $res = $result[$url];
 
         $this->assertEquals(true, $res instanceof SuccessEvent );
@@ -91,6 +109,15 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         $url = $this->url_base . '/test1.html';
 
         $hopper = new Grasshopper();
+        $refHopper = new \ReflectionClass($hopper);
+
+        $refPool = $refHopper->getProperty('pool');
+        $refPool->setAccessible(true);
+
+        /** @var CurlHandlePool $pool */
+        $pool = $refPool->getValue($hopper);
+        $pool_items = $pool->availableCount();
+        $this->assertEquals(Grasshopper::DEFAULT_POOL_SIZE, $pool_items );
 
         $options = [
             'max_download_size' => 10485760,   // 10MB
@@ -99,6 +126,9 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
         $hopper->addRequest(new HttpGetRequest($url, $options));
 
         $result = $hopper->waitForAll();
+
+        $pool_items = $pool->availableCount();
+        $this->assertEquals(Grasshopper::DEFAULT_POOL_SIZE, $pool_items );
 
         //var_dump($result);
 

@@ -10,6 +10,8 @@ use Grasshopper\event\ErrorEvent;
 use Grasshopper\curl\CurlRequest;
 use Grasshopper\curl\CurlResponse;
 use Grasshopper\curl\CurlError;
+use Grasshopper\curl\CurlMultiHandle;
+use Grasshopper\curl\CurlHandlePool;
 use Grasshopper\http\HttpError;
 
 class Grasshopper
@@ -24,7 +26,12 @@ class Grasshopper
     const ERROR_FIND_REQUEST = 7;
     const ERROR_INVALID_REQUEST_PARAMETER = 8;
     const ERROR_MALFORMED_URL = 9;
+    const ERROR_SETOPTION = 10;
+    const ERROR_SETOPTIONS = 11;
+    const ERROR_M_SETOPTION = 12;
+    const ERROR_M_SETOPTIONS = 13;
 
+    const DEFAULT_POOL_SIZE = 10;
     const DEFAULT_USERAGENT = 'Grasshopper';
     const DEFAULT_SLEEP_WAIT = 20;
     const DEFAULT_WAIT_TMEOUT = 6000;
@@ -34,9 +41,6 @@ class Grasshopper
     /** @var CurlRequest[] */
     private $requests;
 
-    /** @var resource */
-    private $mh;
-
     /** @var callable */
     private $complete_callback;
 
@@ -45,6 +49,12 @@ class Grasshopper
 
     /** @var int */
     private $max_download_size;
+
+    /** @var array */
+    private $options;
+
+    /** @var CurlHandlePool */
+    private $pool;
 
     /**
      * Constructs grasshopper object
@@ -85,23 +95,20 @@ class Grasshopper
             $real_options[$k] = $user_val ? $user_val : $v;
         }
 
-        // init curl multi handle
-        $this->mh = curl_multi_init();
-        if ( !$this->mh ){
-            throw new GrasshopperException('curl_multi_init failed',self::ERROR_MULTI_INIT);
-        }
+        $this->options = $real_options;
 
-        // set options to curl multi handle
-        curl_multi_setopt( $this->mh, CURLMOPT_PIPELINING, $real_options[CURLMOPT_PIPELINING] );
-        curl_multi_setopt( $this->mh, CURLMOPT_MAXCONNECTS, $real_options[CURLMOPT_MAXCONNECTS] );
+        $pool_size = isset($options['pool_size']) ? $options['pool_size'] : self::DEFAULT_POOL_SIZE;
+        $this->pool = new CurlHandlePool($pool_size);
+
+        $this->requests = array();
     }
 
     /**
-     * Destructs grasshopper object
+     * Reset object
      */
-    public function __destruct()
+    public function reset()
     {
-        $this->close();
+        $this->requests = array();
     }
 
     /**
@@ -123,11 +130,7 @@ class Grasshopper
      */
     public function addRequest(CurlRequest $request)
     {
-        if ( !$this->mh ){
-            throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
-        }
         $this->requests[] = $request;
-        curl_multi_add_handle($this->mh, $request->getCurlHandle());
     }
 
     /**
@@ -139,12 +142,8 @@ class Grasshopper
      */
     public function addRequests(array $requests)
     {
-        if ( !$this->mh ){
-            throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
-        }
         foreach ( $requests as $request) {
             $this->requests[] = $request;
-            curl_multi_add_handle($this->mh, $request->getCurlHandle());
         }
     }
 
@@ -171,17 +170,24 @@ class Grasshopper
      */
     public function waitForAll($wait_function = null)
     {
-        if ( !$this->mh ){
-            throw new GrasshopperException('curl multi handle is already closed',Grasshopper::ERROR_CLOSED);
+        $mh = new CurlMultiHandle();
+
+        $mh->setOptions($this->options);
+
+        foreach( $this->requests as $req ){
+            $cho = $this->pool->acquireObject();
+            $cho->setRequest($req);
+            $mh->addHandle($cho);
         }
+
         $result = [];
 
         $total_wait = 0;
 
         do {
-            curl_multi_select($this->mh);
+            $mh->select();
 
-            $stat = curl_multi_exec($this->mh, $running);
+            $stat = $mh->execute($running);
             if ( $running ){
                 $start = microtime(true);
                 if ( $wait_function && is_callable($wait_function) ){
@@ -209,7 +215,7 @@ class Grasshopper
 
         // read each response
         do {
-            $res = curl_multi_info_read($this->mh, $remains);
+            $res = $mh->getInfo($remains);
             if ( !$res ) {
                 $start = microtime(true);
                 if ( $wait_function && is_callable($wait_function) ){
@@ -235,8 +241,11 @@ class Grasshopper
             /** @var resource $ch */
             $ch = $res['handle'];
 
+            // find cURL handle object
+            $cho = $this->pool->findObject($ch);
+
             /** @var CurlRequest $request */
-            $request = $this->findRequestFromHandle($ch);
+            $request = $cho->getRequest();
 
             /** @var string $url */
             $request_url = $request->getUrl();
@@ -303,11 +312,13 @@ REQUEST_FAILED:
 
 REQUEST_FINISH:
             {
-                curl_multi_remove_handle($this->mh, $ch);
-                $request->close();
+                $mh->removeHandle( $cho );
+                $this->pool->releaseObject( $cho );
             }
 
         } while ($remains);
+
+        $mh->close();
 
         return $result;
     }
@@ -318,41 +329,6 @@ REQUEST_FINISH:
     public function getMaxDownloadSize()
     {
         return $this->max_download_size;
-    }
-
-    /**
-     * close cURL handles
-     */
-    public function close()
-    {
-        if ( $this->requests ){
-            foreach( $this->requests as $request ){
-                $request->detach( $this->mh );
-                $request->close();
-            }
-            $this->requests = null;
-        }
-        if ( $this->mh ){
-            curl_multi_close( $this->mh );
-            $this->mh = null;
-        }
-    }
-
-    /**
-     * Find request from cURL handle
-     *
-     * @param resource $curl_handle
-     *
-     * @return CurlRequest
-     */
-    private function findRequestFromHandle($curl_handle)
-    {
-        foreach($this->requests as $request){
-            if ( $request->getCurlHandle() === $curl_handle ){
-                return $request;
-            }
-        }
-        throw new GrasshopperException('could not find request from handle', self::ERROR_FIND_REQUEST);
     }
 
 }

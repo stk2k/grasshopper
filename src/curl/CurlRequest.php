@@ -22,13 +22,13 @@ class CurlRequest
     private $error_callback;
 
     /** @var resource */
-    private $ch;
-
-    /** @var resource */
     private $tmpfile;
 
     /** @var int */
     private $max_download_size;
+
+    /** @var array */
+    private $options;
 
     /**
      * Constructs cURL request object
@@ -112,7 +112,7 @@ class CurlRequest
             CURLOPT_HTTP_VERSION => isset($options['http_version']) ? $options['http_version'] : null,
             CURLOPT_HTTPHEADER => isset($options['http_header']) ? $options['http_header'] : null,
             CURLOPT_TIMEOUT => isset($options['timeout']) ? $options['timeout'] : null,
-            CURLOPT_CONNECTTIMEOUT => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
+            CURLOPT_CONNECTTIMEOUT_MS => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
             CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : null,
 
             /* HTTP/POST */
@@ -135,6 +135,13 @@ class CurlRequest
         }
         $user_curl_options[CURLOPT_HTTPHEADER] = $user_http_header->compile();
 
+        // custom request
+        $user_curl_options[CURLOPT_CUSTOMREQUEST] = $this->method;
+
+        // debug
+        $user_curl_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : false;
+        $user_curl_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : STDERR;
+
         // merge options between user and defaults
         $real_options = [];
         foreach($dafaults as $k => $v){
@@ -142,36 +149,31 @@ class CurlRequest
             $real_options[$k] = $user_val ? $user_val : $v;
         }
 
-        // init curl handle
-        $this->ch = curl_init();
-        if ( !$this->ch ){
-            throw new GrasshopperException('curl_init failed',Grasshopper::ERROR_INIT);
-        }
-
-        // set options to curl handle
-        curl_setopt_array($this->ch, $real_options);
-
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->method);
-        curl_setopt($this->ch, CURLOPT_VERBOSE, isset($options['verbose']) ? $options['verbose'] : false);
-        curl_setopt($this->ch, CURLOPT_STDERR, isset($options['stderr']) ? $options['stderr'] : STDERR);
+        $this->options = $real_options;
     }
 
     /**
      * Get URL
+     *
+     * @return string
      */
     public function getUrl(){
         return $this->url;
     }
 
     /**
-     * Get cURL handle
+     * Get cURL options
+     *
+     * @return array
      */
-    public function getCurlHandle(){
-        return $this->ch;
+    public function getOptions(){
+        return $this->options;
     }
 
     /**
      * Get file handle
+     *
+     * @return resource
      */
     public function getFileHandle(){
         return $this->tmpfile;
@@ -179,31 +181,12 @@ class CurlRequest
 
     /**
      * Get max download size
+     *
+     * @return integer
      */
     public function getMaxDownloadSize()
     {
         return $this->max_download_size;
-    }
-
-    /**
-     * Detach from cURL multi handle
-     *
-     * @param resource $cm_handle
-     */
-    public function detach($cm_handle){
-        if ( $this->ch ){
-            curl_multi_remove_handle( $cm_handle, $this->ch );
-        }
-    }
-
-    /**
-     * close cURL handle and memory file handle
-     */
-    public function close(){
-        if ( $this->ch ){
-            curl_close($this->ch);
-            $this->ch = null;
-        }
     }
 
     /**
