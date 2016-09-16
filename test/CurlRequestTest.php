@@ -1,8 +1,6 @@
 <?php
 namespace Grasshopper;
 
-use \Grasshopper\curl\CurlRequest;
-
 class CurlRequestTest extends \PhpUnit_Framework_TestCase
 {
     protected function setUp()
@@ -11,15 +9,12 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
 
     public function testIsVerboseDefault()
     {
-        $options = array();
-
-        $req = new CurlRequest('GET','http://sample.com', $options);
+        $req = new HttpGetRequest('http://sample.com');
 
         $actual = $req->isVerbose();
 
         $this->assertEquals(false, $actual);
     }
-
 
     public function testIsVerboseSet()
     {
@@ -27,10 +22,28 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
             'verbose' => true
         );
 
-        $req = new CurlRequest('GET','http://sample.com', $options);
+        $req = new HttpGetRequest('http://sample.com', $options);
 
         $actual = $req->isVerbose();
 
         $this->assertEquals(true, $actual);
+    }
+
+    public function testGetMethodDefault()
+    {
+        $req = new HttpGetRequest('http://sample.com');
+
+        $actual = $req->getMethod();
+
+        $this->assertEquals('GET', $actual);
+    }
+
+    public function testGetMethodPost()
+    {
+        $req = new HttpPostRequest('http://sample.com',array());
+
+        $actual = $req->getMethod();
+
+        $this->assertEquals('POST', $actual);
     }
 }

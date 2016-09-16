@@ -99,10 +99,6 @@ class CurlRequest
             CURLOPT_PROGRESSFUNCTION => function($down_size, $downloaded, $upload_size, $uploaded){
                 return $downloaded > $this->max_download_size ? 1 : 0;
             },
-
-            /* debug */
-            CURLOPT_VERBOSE => false,
-            CURLOPT_STDERR => STDERR,
         ];
 
         /** TCP Fast Open */
@@ -140,19 +136,19 @@ class CurlRequest
         }
         $user_curl_options[CURLOPT_HTTPHEADER] = $user_http_header->compile();
 
-        // custom request
-        $user_curl_options[CURLOPT_CUSTOMREQUEST] = $this->method;
-
-        // debug
-        $user_curl_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : null;
-        $user_curl_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : null;
-
         // merge options between user and defaults
         $real_options = [];
         foreach($dafaults as $k => $v){
             $user_val = isset($user_curl_options[$k]) ? $user_curl_options[$k] : null;
             $real_options[$k] = $user_val ? $user_val : $v;
         }
+
+        // custom request
+        $real_options[CURLOPT_CUSTOMREQUEST] = $this->method;
+
+        // debug
+        $real_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : false;
+        $real_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : STDERR;
 
         $this->options = $real_options;
     }
@@ -164,6 +160,15 @@ class CurlRequest
      */
     public function isVerbose(){
         return isset($this->options[CURLOPT_VERBOSE]) ? $this->options[CURLOPT_VERBOSE] : false;
+    }
+
+    /**
+     * Get mthod
+     *
+     * @return boolean
+     */
+    public function getMethod(){
+        return isset($this->options[CURLOPT_CUSTOMREQUEST]) ? $this->options[CURLOPT_CUSTOMREQUEST] : '';
     }
 
     /**
