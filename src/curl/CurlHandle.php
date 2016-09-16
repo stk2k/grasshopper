@@ -3,6 +3,7 @@ namespace Grasshopper\curl;
 
 use Grasshopper\Grasshopper;
 use Grasshopper\exception\GrasshopperException;
+use Grasshopper\debug\CurlDebug;
 
 class CurlHandle
 {
@@ -55,6 +56,9 @@ class CurlHandle
 
         $options = $request->getOptions();
         $this->setOptions($options);
+        if ( $request->isVerbose() ){
+            CurlDebug::printOptions($options);
+        }
     }
 
     /**

@@ -6,6 +6,7 @@ use Grasshopper\exception\GrasshopperException;
 use Grasshopper\HttpPostRequest;
 use Grasshopper\event\SuccessEvent;
 use Grasshopper\event\ErrorEvent;
+use Grasshopper\debug\CurlDebug;
 
 class CurlRequest
 {
@@ -98,6 +99,10 @@ class CurlRequest
             CURLOPT_PROGRESSFUNCTION => function($down_size, $downloaded, $upload_size, $uploaded){
                 return $downloaded > $this->max_download_size ? 1 : 0;
             },
+
+            /* debug */
+            CURLOPT_VERBOSE => false,
+            CURLOPT_STDERR => STDERR,
         ];
 
         /** TCP Fast Open */
@@ -139,8 +144,8 @@ class CurlRequest
         $user_curl_options[CURLOPT_CUSTOMREQUEST] = $this->method;
 
         // debug
-        $user_curl_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : false;
-        $user_curl_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : STDERR;
+        $user_curl_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : null;
+        $user_curl_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : null;
 
         // merge options between user and defaults
         $real_options = [];
@@ -150,6 +155,15 @@ class CurlRequest
         }
 
         $this->options = $real_options;
+    }
+
+    /**
+     * Check if verbose
+     *
+     * @return boolean
+     */
+    public function isVerbose(){
+        return isset($this->options[CURLOPT_VERBOSE]) ? $this->options[CURLOPT_VERBOSE] : false;
     }
 
     /**
@@ -211,6 +225,14 @@ class CurlRequest
         if ( $this->error_callback ){
             call_user_func_array( $this->error_callback, [$event] );
         }
+    }
+
+    /**
+     * Show options
+     */
+    public function printOptions()
+    {
+        CurlDebug::printOptions($this->options);
     }
 
     /**
