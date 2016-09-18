@@ -56,6 +56,11 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
         $actual = $req->getTimeout();
 
         $this->assertEquals(CurlRequest::DEFAULT_TIMEOUT, $actual);
+
+        $options = $req->getOptions();
+
+        $this->assertEquals(true, isset($options[CURLOPT_TIMEOUT]));
+        $this->assertEquals(false, isset($options[CURLOPT_TIMEOUT_MS]));
     }
 
     public function testGetTimeout()
@@ -69,6 +74,11 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
         $actual = $req->getTimeout();
 
         $this->assertEquals(999, $actual);
+
+        $options = $req->getOptions();
+
+        $this->assertEquals(true, isset($options[CURLOPT_TIMEOUT]));
+        $this->assertEquals(false, isset($options[CURLOPT_TIMEOUT_MS]));
     }
 
     public function testGetTimeoutMS()
@@ -82,6 +92,11 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
         $actual = $req->getTimeout(true);
 
         $this->assertEquals(999, $actual);
+
+        $options = $req->getOptions();
+
+        $this->assertEquals(false, isset($options[CURLOPT_TIMEOUT]));
+        $this->assertEquals(true, isset($options[CURLOPT_TIMEOUT_MS]));
     }
 
     public function testGetConnectTimeoutDefault()
@@ -90,7 +105,12 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
 
         $actual = $req->getConnectTimeout();
 
-        $this->assertEquals(CurlRequest::DEFAULT_CONNECT_TIMEOUT, $actual);
+        $this->assertEquals(CurlRequest::DEFAULT_CONNECTTIMEOUT, $actual);
+
+        $options = $req->getOptions();
+
+        $this->assertEquals(true, isset($options[CURLOPT_CONNECTTIMEOUT]));
+        $this->assertEquals(false, isset($options[CURLOPT_CONNECTTIMEOUT_MS]));
     }
 
     public function testGetConnectTimeout()
@@ -104,6 +124,11 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
         $actual = $req->getConnectTimeout();
 
         $this->assertEquals(999, $actual);
+
+        $options = $req->getOptions();
+
+        $this->assertEquals(true, isset($options[CURLOPT_CONNECTTIMEOUT]));
+        $this->assertEquals(false, isset($options[CURLOPT_CONNECTTIMEOUT_MS]));
     }
 
     public function testGetConnectTimeoutMS()
@@ -117,6 +142,11 @@ class CurlRequestTest extends \PhpUnit_Framework_TestCase
         $actual = $req->getConnectTimeout(true);
 
         $this->assertEquals(999, $actual);
+
+        $options = $req->getOptions();
+
+        $this->assertEquals(false, isset($options[CURLOPT_CONNECTTIMEOUT]));
+        $this->assertEquals(true, isset($options[CURLOPT_CONNECTTIMEOUT_MS]));
     }
 
 

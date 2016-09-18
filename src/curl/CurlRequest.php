@@ -11,7 +11,7 @@ use Grasshopper\debug\CurlDebug;
 class CurlRequest
 {
     const DEFAULT_TIMEOUT = 60;
-    const DEFAULT_CONNECT_TIMEOUT = 60;
+    const DEFAULT_CONNECTTIMEOUT = 60;
 
     /** @var string */
     private $method;
@@ -80,10 +80,6 @@ class CurlRequest
             CURLOPT_PROXY => null,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_NONE,
             CURLOPT_HTTPHEADER => (new CurlRequestHeader)->compile(),
-            CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT,
-            CURLOPT_TIMEOUT_MS => self::DEFAULT_TIMEOUT * 1000,
-            CURLOPT_CONNECTTIMEOUT => self::DEFAULT_CONNECT_TIMEOUT,
-            CURLOPT_CONNECTTIMEOUT_MS => self::DEFAULT_CONNECT_TIMEOUT * 1000,
             CURLOPT_BUFFERSIZE => Grasshopper::DEFAULT_BUFFER_SIZE,
 
             /* SSL */
@@ -117,10 +113,6 @@ class CurlRequest
             CURLOPT_PROXY => isset($options['proxy']) ? $options['proxy'] : null,
             CURLOPT_HTTP_VERSION => isset($options['http_version']) ? $options['http_version'] : null,
             CURLOPT_HTTPHEADER => isset($options['http_header']) ? $options['http_header'] : null,
-            CURLOPT_TIMEOUT => isset($options['timeout']) ? $options['timeout'] : null,
-            CURLOPT_TIMEOUT_MS => isset($options['timeout_ms']) ? $options['timeout_ms'] : null,
-            CURLOPT_CONNECTTIMEOUT => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
-            CURLOPT_CONNECTTIMEOUT_MS => isset($options['connect_timeout_ms']) ? $options['connect_timeout_ms'] : null,
             CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : null,
 
             /* HTTP/POST */
@@ -156,6 +148,28 @@ class CurlRequest
         // debug
         $real_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : false;
         $real_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : STDERR;
+
+        // set timeout
+        if ( isset($options['timeout']) ){
+            $real_options[CURLOPT_TIMEOUT] = $options['timeout'];
+        }
+        elseif ( isset($options['timeout_ms']) ){
+            $real_options[CURLOPT_TIMEOUT_MS] = $options['timeout_ms'];
+        }
+        else{
+            $real_options[CURLOPT_TIMEOUT] = self::DEFAULT_TIMEOUT;
+        }
+
+        // set connect timeout
+        if ( isset($options['connect_timeout']) ){
+            $real_options[CURLOPT_CONNECTTIMEOUT] = $options['connect_timeout'];
+        }
+        elseif ( isset($options['connect_timeout_ms']) ){
+            $real_options[CURLOPT_CONNECTTIMEOUT_MS] = $options['connect_timeout_ms'];
+        }
+        else{
+            $real_options[CURLOPT_CONNECTTIMEOUT] = self::DEFAULT_CONNECTTIMEOUT;
+        }
 
         $this->options = $real_options;
     }
