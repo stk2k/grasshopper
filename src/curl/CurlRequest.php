@@ -10,6 +10,9 @@ use Grasshopper\debug\CurlDebug;
 
 class CurlRequest
 {
+    const DEFAULT_TIMEOUT = 60;
+    const DEFAULT_CONNECT_TIMEOUT = 60;
+
     /** @var string */
     private $method;
 
@@ -77,8 +80,10 @@ class CurlRequest
             CURLOPT_PROXY => null,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_NONE,
             CURLOPT_HTTPHEADER => (new CurlRequestHeader)->compile(),
-            CURLOPT_TIMEOUT => 400,
-            CURLOPT_CONNECTTIMEOUT => 0,
+            CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT,
+            CURLOPT_TIMEOUT_MS => self::DEFAULT_TIMEOUT * 1000,
+            CURLOPT_CONNECTTIMEOUT => self::DEFAULT_CONNECT_TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT_MS => self::DEFAULT_CONNECT_TIMEOUT * 1000,
             CURLOPT_BUFFERSIZE => Grasshopper::DEFAULT_BUFFER_SIZE,
 
             /* SSL */
@@ -113,7 +118,9 @@ class CurlRequest
             CURLOPT_HTTP_VERSION => isset($options['http_version']) ? $options['http_version'] : null,
             CURLOPT_HTTPHEADER => isset($options['http_header']) ? $options['http_header'] : null,
             CURLOPT_TIMEOUT => isset($options['timeout']) ? $options['timeout'] : null,
-            CURLOPT_CONNECTTIMEOUT_MS => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
+            CURLOPT_TIMEOUT_MS => isset($options['timeout_ms']) ? $options['timeout_ms'] : null,
+            CURLOPT_CONNECTTIMEOUT => isset($options['connect_timeout']) ? $options['connect_timeout'] : null,
+            CURLOPT_CONNECTTIMEOUT_MS => isset($options['connect_timeout_ms']) ? $options['connect_timeout_ms'] : null,
             CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : null,
 
             /* HTTP/POST */
@@ -140,7 +147,7 @@ class CurlRequest
         $real_options = [];
         foreach($dafaults as $k => $v){
             $user_val = isset($user_curl_options[$k]) ? $user_curl_options[$k] : null;
-            $real_options[$k] = $user_val ? $user_val : $v;
+            $real_options[$k] = $user_val !== null ? $user_val : $v;
         }
 
         // custom request
@@ -163,7 +170,7 @@ class CurlRequest
     }
 
     /**
-     * Get mthod
+     * Get method
      *
      * @return boolean
      */
@@ -178,6 +185,34 @@ class CurlRequest
      */
     public function getUrl(){
         return $this->url;
+    }
+
+    /**
+     * Get timeout
+     *
+     * @param boolean $in_millisec
+     *
+     * @return integer
+     */
+    public function getTimeout( $in_millisec = false ){
+        if ( $in_millisec ){
+            return isset($this->options[CURLOPT_TIMEOUT_MS]) ? $this->options[CURLOPT_TIMEOUT_MS] : -1;
+        }
+        return isset($this->options[CURLOPT_TIMEOUT]) ? $this->options[CURLOPT_TIMEOUT] : -1;
+    }
+
+    /**
+     * Get connect timeout
+     *
+     * @param boolean $in_millisec
+     *
+     * @return integer
+     */
+    public function getConnectTimeout( $in_millisec = false ){
+        if ( $in_millisec ){
+            return isset($this->options[CURLOPT_CONNECTTIMEOUT_MS]) ? $this->options[CURLOPT_CONNECTTIMEOUT_MS] : -1;
+        }
+        return isset($this->options[CURLOPT_CONNECTTIMEOUT]) ? $this->options[CURLOPT_CONNECTTIMEOUT] : -1;
     }
 
     /**
