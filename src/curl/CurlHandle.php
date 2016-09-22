@@ -27,14 +27,6 @@ class CurlHandle
     }
 
     /**
-     * Destructs CurlHandle object
-     */
-    public function __destruct()
-    {
-        $this->close();
-    }
-
-    /**
      * close cURL handle and memory file handle
      */
     public function close()
