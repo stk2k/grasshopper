@@ -146,13 +146,6 @@ class Grasshopper
      */
     public function addRequest($url, $options = array())
     {
-        if ( !is_string($url) ) {
-            throw new \InvalidArgumentException('the url parameter type must be a string. Input type:' . gettype($url));
-        }
-        if ( !is_array($options) ) {
-            throw new \InvalidArgumentException('the options parameter type must be an array. Input type:' . gettype($options));
-        }
-
         $request = new HttpGetRequest($url, $options);
         $this->requests[] = $request;
         return $this;
