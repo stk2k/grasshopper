@@ -313,7 +313,7 @@ REQUEST_SUCCEEDED:
                 if ( $this->complete_callback ){
                     call_user_func_array( $this->complete_callback, [$event] );
                 }
-                $result[$request_url] = $event;
+                $result["$request_url"] = $event;
                 goto REQUEST_FINISH;
             }
 
@@ -325,7 +325,7 @@ REQUEST_FAILED:
                 if ( $this->error_callback ){
                     call_user_func_array( $this->error_callback, [$event] );
                 }
-                $result[$request_url] = $event;
+                $result["$request_url"] = $event;
                 goto REQUEST_FINISH;
             }
 
