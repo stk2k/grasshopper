@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 spl_autoload_register(function($class) {
     if (strpos($class, 'Grasshopper\\') === 0) {
         $dir = strcasecmp(substr($class, -4), 'Test') ? 'src/' : 'test/';

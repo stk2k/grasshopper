@@ -1,10 +1,10 @@
 <?php
-namespace Grasshopper;
-
+use \Grasshopper\Grasshopper;
+use \Grasshopper\HttpGetRequest;
 use \Grasshopper\event\SuccessEvent;
 use \Grasshopper\curl\CurlHandlePool;
 
-class GrasshopperTest extends \PhpUnit_Framework_TestCase
+class GrasshopperTest extends PHPUnit_Framework_TestCase
 {
     const LOCAL_PORT = '8082';
 
@@ -65,7 +65,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $hopper->addRequest($url);
 
-        $result = $hopper->waitForAll();
+        $result = $hopper->waitForAll(false);
 
         $this->assertEquals(1, count($result) );
         $this->assertEquals(true, isset($result[$url]) );
@@ -87,7 +87,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $hopper->addRequest($url);
 
-        $result = $hopper->waitForAll();
+        $result = $hopper->waitForAll(false);
 
         $this->assertEquals(1, count($result) );
         $this->assertEquals(true, isset($result[$url]) );
@@ -125,7 +125,7 @@ class GrasshopperTest extends \PhpUnit_Framework_TestCase
 
         $hopper->addRequest($url, $options);
 
-        $result = $hopper->waitForAll();
+        $result = $hopper->waitForAll(false);
 
         $pool_items = $pool->availableCount();
         $this->assertEquals(Grasshopper::DEFAULT_POOL_SIZE, $pool_items );

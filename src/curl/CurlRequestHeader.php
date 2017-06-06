@@ -46,8 +46,13 @@ class CurlRequestHeader
         $real_headers = [];
         foreach($dafaults as $k => $v){
             $user_val = isset($user_headers[$k]) ? $user_headers[$k] : null;
-            $real_headers[$k] = $user_val ? $user_val : $v;
+            $real_headers[$k] = $user_val !== null ? $user_val : $v;
         }
+
+        if ( isset($real_headers['Keep-Alive']) && isset($real_headers['Connection']) && $real_headers['Connection'] != 'keep-alive' ){
+            unset($real_headers['Keep-Alive']);
+        }
+
         $this->headers = $real_headers;
     }
 

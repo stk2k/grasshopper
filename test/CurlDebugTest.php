@@ -1,9 +1,8 @@
 <?php
-namespace Grasshopper;
 
 use \Grasshopper\debug\CurlDebug;
 
-class CurlDebugTest extends \PhpUnit_Framework_TestCase
+class CurlDebugTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {

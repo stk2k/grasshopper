@@ -97,21 +97,16 @@ class CurlRequest
             /* file */
             CURLOPT_FILE => $this->tmpfile,
             CURLOPT_NOPROGRESS => false,
-            CURLOPT_PROGRESSFUNCTION => function($down_size, $downloaded, $upload_size, $uploaded){
+            CURLOPT_PROGRESSFUNCTION => function($resource, $down_size, $downloaded, $upload_size, $uploaded){
                 return $downloaded > $this->max_download_size ? 1 : 0;
             },
         ];
-
-        /** TCP Fast Open */
-        if ( defined('CURLOPT_TCP_FASTOPEN') ){
-            $dafaults[CURLOPT_TCP_FASTOPEN] = true;
-        }
 
         $user_curl_options = [
             /* user customizable fields by options parameter */
             CURLOPT_USERAGENT => isset($options['user_agent']) ? $options['user_agent'] : null,
             CURLOPT_PROXY => isset($options['proxy']) ? $options['proxy'] : null,
-            CURLOPT_HTTP_VERSION => isset($options['http_version']) ? $options['http_version'] : null,
+            CURLOPT_HTTP_VERSION => isset($options['http_version']) ? $options['http_version'] : CURL_HTTP_VERSION_NONE ,
             CURLOPT_HTTPHEADER => isset($options['http_header']) ? $options['http_header'] : null,
             CURLOPT_BUFFERSIZE => isset($options['buffer_size']) ? $options['buffer_size'] : null,
 

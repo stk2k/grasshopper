@@ -30,6 +30,7 @@ class Grasshopper
     const ERROR_SETOPTIONS = 11;
     const ERROR_M_SETOPTION = 12;
     const ERROR_M_SETOPTIONS = 13;
+    const ERROR_INVALID_OPTION = 14;
 
     const DEFAULT_POOL_SIZE = 10;
     const DEFAULT_USERAGENT = 'Grasshopper';
@@ -180,6 +181,7 @@ class Grasshopper
      *     return false;    // continue execution of waitForAll
      * }
      *
+     * @param boolean $bulk_set_options
      * @param callable $wait_function    user defined wait function.if this set to null, default wait ant default
      *                                   timeout will be applied.
      *
@@ -187,15 +189,22 @@ class Grasshopper
      *
      * @throws UserCancelException
      */
-    public function waitForAll($wait_function = null)
+    public function waitForAll($bulk_set_options = true, $wait_function = null)
     {
         $mh = new CurlMultiHandle();
-
-        $mh->setOptions($this->options);
+    
+        if ( $bulk_set_options ){
+            $mh->setOptions($this->options);
+        }
+        else{
+            foreach( $this->options as $key => $value ){
+                $mh->setOption( $key, $value );
+            }
+        }
 
         foreach( $this->requests as $req ){
             $cho = $this->pool->acquireObject();
-            $cho->setRequest($req);
+            $cho->setRequest($req, $bulk_set_options);
             $mh->addHandle($cho);
         }
 

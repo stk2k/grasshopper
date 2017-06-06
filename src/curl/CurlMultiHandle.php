@@ -63,7 +63,11 @@ class CurlMultiHandle
     {
         $res = curl_multi_setopt( $this->mh, $option, $value );
         if ( !$res ){
-            throw new GrasshopperException('curl_setopt failed',Grasshopper::ERROR_M_SETOPTION);
+            $error = array(
+                'option' => CurlOption::getString($option),
+                'value' => $value
+            );
+            throw new GrasshopperException('curl_setopt failed: ' . print_r($error,true),Grasshopper::ERROR_M_SETOPTION);
         }
     }
 
@@ -79,7 +83,11 @@ class CurlMultiHandle
         foreach( $options as $key => $value ){
             $res = curl_multi_setopt( $this->mh, $key, $value );
             if ( !$res ){
-                throw new GrasshopperException('curl_setopt_array failed',Grasshopper::ERROR_M_SETOPTIONS);
+                $error = array(
+                    'option' => CurlOption::getString($key),
+                    'value' => $value
+                );
+                throw new GrasshopperException('curl_multi_setopt failed: ' . print_r($error,true),Grasshopper::ERROR_M_SETOPTIONS);
             }
         }
     }

@@ -41,13 +41,23 @@ class CurlHandle
      * Set request object
      *
      * @param CurlRequest $request
+     * @param boolean $bulk_set_options
      */
-    public function setRequest( $request )
+    public function setRequest( $request, $bulk_set_options = true )
     {
         $this->request = $request;
 
         $options = $request->getOptions();
-        $this->setOptions($options);
+        
+        if ( $bulk_set_options ){
+            $this->setOptions($options);
+        }
+        else{
+            foreach( $options as $key => $value ){
+                $this->setOption( $key, $value );
+            }
+        }
+        
         if ( $request->isVerbose() ){
             CurlDebug::printOptions($options);
         }
@@ -94,7 +104,11 @@ class CurlHandle
     {
         $res = curl_setopt( $this->ch, $option, $value );
         if ( !$res ){
-            throw new GrasshopperException('curl_setopt failed',Grasshopper::ERROR_SETOPTION);
+            $error = array(
+                'option' => CurlOption::getString($option),
+                'value' => $value
+            );
+            throw new GrasshopperException('curl_setopt failed: ' . print_r($error,true),Grasshopper::ERROR_SETOPTION);
         }
     }
 
@@ -109,7 +123,13 @@ class CurlHandle
     {
         $res = curl_setopt_array( $this->ch, $options );
         if ( !$res ){
-            throw new GrasshopperException('curl_setopt_array failed',Grasshopper::ERROR_SETOPTIONS);
+            $error_options = array();
+            foreach ($options as $key => $value){
+                $key = CurlOption::getString($key);
+                $error_options[$key] = $value;
+            }
+            $error_options = print_r($error_options,true);
+            throw new GrasshopperException('curl_setopt_array failed:' . $error_options,Grasshopper::ERROR_SETOPTIONS);
         }
     }
 

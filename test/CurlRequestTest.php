@@ -1,9 +1,9 @@
 <?php
-namespace Grasshopper;
-
+use Grasshopper\HttpGetRequest;
+use Grasshopper\HttpPostRequest;
 use Grasshopper\curl\CurlRequest;
 
-class CurlRequestTest extends \PhpUnit_Framework_TestCase
+class CurlRequestTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
