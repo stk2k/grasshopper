@@ -48,9 +48,11 @@ class CurlDebug
         if ( !is_array($curl_vars) ){
             return '';
         }
-        $curl_vars = array_filter($curl_vars, function ($v,$k){
-            return strpos($k, 'CURLOPT_') === 0;
-        }, ARRAY_FILTER_USE_BOTH);
+        foreach($curl_vars as $k => $v){
+            if (strpos($k, 'CURLOPT_') === false){
+                unset($curl_vars[$k]);
+            }
+        }
         $curl_vars = array_flip($curl_vars);
 
         return isset($curl_vars[$key]) ? $curl_vars[$key] : '';

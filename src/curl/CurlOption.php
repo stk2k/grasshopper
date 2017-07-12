@@ -92,7 +92,6 @@ class CurlOption
             case CURLOPT_RANDOM_FILE:   return 'CURLOPT_RANDOM_FILE';
             case CURLOPT_RANGE:   return 'CURLOPT_RANGE';
             case CURLOPT_REFERER:   return 'CURLOPT_REFERER';
-            case CURLOPT_SERVICE_NAME:   return 'CURLOPT_SERVICE_NAME';
             case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:   return 'CURLOPT_SSH_HOST_PUBLIC_KEY_MD5';
             case CURLOPT_SSH_PUBLIC_KEYFILE:   return 'CURLOPT_SSH_PUBLIC_KEYFILE';
             case CURLOPT_SSH_PRIVATE_KEYFILE:   return 'CURLOPT_SSH_PRIVATE_KEYFILE';
@@ -166,6 +165,7 @@ class CurlOption
         if ( version_compare(PHP_VERSION,'7.0.7') >= 0 ){
             switch($option)
             {
+                case CURLOPT_SERVICE_NAME:   return 'CURLOPT_SERVICE_NAME';
                 case CURLOPT_PROXYHEADER:   return 'CURLOPT_PROXYHEADER';
                 case CURLOPT_XOAUTH2_BEARER:   return 'CURLOPT_XOAUTH2_BEARER';
                 case CURLOPT_UNIX_SOCKET_PATH:   return 'CURLOPT_UNIX_SOCKET_PATH';
