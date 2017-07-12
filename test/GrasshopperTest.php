@@ -1,8 +1,8 @@
 <?php
 use \Grasshopper\Grasshopper;
 use \Grasshopper\HttpGetRequest;
-use \Grasshopper\event\SuccessEvent;
 use \Grasshopper\curl\CurlHandlePool;
+use \Grasshopper\event\SuccessEvent;
 
 class GrasshopperTest extends PHPUnit_Framework_TestCase
 {
@@ -13,6 +13,26 @@ class GrasshopperTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->url_base = 'http://localhost:' . self::LOCAL_PORT;
+    }
+    
+    public function testReadmeSample()
+    {
+        $hopper = new Grasshopper();
+    
+        $url = 'http://example.com';
+    
+        $hopper->addRequest($url);
+    
+        $result = $hopper->waitForAll();
+    
+        $res = $result[$url];
+    
+        $this->assertTrue( $res instanceof SuccessEvent );
+        
+        /** @var SuccessEvent $res */
+        // success
+        $status = $res->getResponse()->getStatusCode();
+        $this->assertEquals( 200, $status );
     }
 
     public function testAddRequest()

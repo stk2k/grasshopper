@@ -152,6 +152,9 @@ class Grasshopper
      */
     public function addRequest($url, $options = array())
     {
+        if (!is_string($url)){
+            throw new \InvalidArgumentException('url paramter must be string');
+        }
         $request = new HttpGetRequest($url, $options);
         $this->requests[] = $request;
         return $this;
@@ -164,8 +167,11 @@ class Grasshopper
      *
      * @return Grasshopper
      */
-    public function addRequests(array $requests)
+    public function addRequests($requests)
     {
+        if (!is_array($requests)){
+            throw new \InvalidArgumentException('requests paramter must be array');
+        }
         foreach ( $requests as $request) {
             $this->requests[] = $request;
         }
@@ -352,7 +358,7 @@ REQUEST_FINISH:
         } while ($remains);
 
         $mh->close();
-
+        
         return $result;
     }
 

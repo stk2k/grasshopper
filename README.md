@@ -10,28 +10,30 @@ requests.
 ## Demo
 
 ```php
-    use Grasshopper\Grasshopper;
+use Grasshopper\Grasshopper;
+use \Grasshopper\event\SuccessEvent;
+use \Grasshopper\event\ErrorEvent;
  
-    $hopper = new Grasshopper();
- 
-    $url = 'http://www.example.org/';
- 
-    $hopper->addRequest(new HttpGetRequest($url));
- 
-    $result = $hopper->waitForAll();
- 
-    $res = $result[$url];
-    if ( $res instanceof SuccessEvent ){
-        // success
-        $status = $res->getResponse()->getStatusCode();
-        $body = $res->getResponse()->getBody();
-        echo "success: status=$status" . PHP_EOL;
-        echo $body . PHP_EOL;
-    }
-    elseif ( $res instanceof ErrorEvent ){
-        // error
-        echo "error: " . $res->getError()->getMessage() . PHP_EOL;
-    }
+$hopper = new Grasshopper();
+
+$url = 'http://example.com';
+
+$hopper->addRequest($url);
+
+$result = $hopper->waitForAll();
+
+$res = $result[$url];
+if ( $res instanceof SuccessEvent ){
+    // success
+    $status = $res->getResponse()->getStatusCode();
+    $body = $res->getResponse()->getBody();
+    echo "success: status=$status" . PHP_EOL;
+    echo $body . PHP_EOL;
+}
+elseif ( $res instanceof ErrorEvent ){
+    // error
+    echo "error: " . $res->getError()->getMessage() . PHP_EOL;
+}
  
 ```
 
@@ -65,7 +67,7 @@ require 'vendor/autoload.php';
 ```
 
 ## License
-[MIT](https://github.com/stk2k/eventstream/blob/master/LICENSE)
+[MIT](https://github.com/stk2k/grasshopper/blob/master/LICENSE)
 
 ## Author
 
