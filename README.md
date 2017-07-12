@@ -6,6 +6,8 @@ requests.
 
 
 ```php
+    use Grasshopper\Grasshopper;
+
     $hopper = new Grasshopper();
 
     $url = 'http://www.example.org/';
