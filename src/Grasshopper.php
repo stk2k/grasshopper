@@ -79,17 +79,19 @@ class Grasshopper
         // options
         $dafaults = [
             /* user customizable fields by options parameter */
-            CURLMOPT_MAXCONNECTS => 10,
         ];
 
         $user_mcurl_options = [
             /* user customizable fields by options parameter */
-            CURLMOPT_MAXCONNECTS => isset($options['max_connects']) ? $options['max_connects'] : null,
         ];
         
         if ( defined('CURLMOPT_PIPELINING') ){
             $dafaults[CURLMOPT_PIPELINING] = 1;
             $user_mcurl_options[CURLMOPT_PIPELINING] = isset($options['pipelining']) ? $options['pipelining'] : null;
+        }
+        if ( defined('CURLMOPT_MAXCONNECTS') ){
+            $dafaults[CURLMOPT_MAXCONNECTS] = 10;
+            $user_mcurl_options[CURLMOPT_MAXCONNECTS] = isset($options['max_connects']) ? $options['max_connects'] : null;
         }
 
         // merge options between user and defaults
