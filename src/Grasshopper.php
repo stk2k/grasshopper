@@ -143,20 +143,19 @@ class Grasshopper
     /**
      * Add request
      *
-     * @param string $url
+     * @param string|CurlRequest $request
      * @param array $options
      *
      * @return Grasshopper
      *
      * @throws \InvalidArgumentException
      */
-    public function addRequest($url, $options = array())
+    public function addRequest($request, $options = array())
     {
-        if (!is_string($url)){
-            throw new \InvalidArgumentException('url paramter must be string');
+        if (!is_string($request) && !($request instanceof CurlRequest)){
+            throw new \InvalidArgumentException('request paramter must be string or CurlRequest');
         }
-        $request = new HttpGetRequest($url, $options);
-        $this->requests[] = $request;
+        $this->requests[] = is_string($request) ? new HttpGetRequest($request, $options) : $request;
         return $this;
     }
 
