@@ -14,6 +14,8 @@ use Grasshopper\util\Sanitizer;
 
 class HttpPostRequest extends CurlRequest
 {
+    private $post_data;
+    
     /**
      * Constructs HTTP Post request object
      *
@@ -25,7 +27,18 @@ class HttpPostRequest extends CurlRequest
     {
         $options['post_fields'] = http_build_query(Sanitizer::removeControlChars($post_data));
         $options['post'] = true;
-
+        
+        $this->post_data = $post_data;
         parent::__construct( 'POST', $url, $options );
+    }
+    
+    /**
+     * get post data
+     *
+     * @return array
+     */
+    public function getPostData()
+    {
+        return $this->post_data;
     }
 }
