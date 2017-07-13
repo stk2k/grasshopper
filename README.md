@@ -3,9 +3,14 @@ Grasshopper, PHP HTTP Multi Request Client
 
 ## Description
 
-Grasshopper is a yet another HTTP Client that makes it easy to send HTTP
-requests.
+Grasshopper is a yet another cURL PHP library wchich makes you easy to send HTTP request.
+This library can process multiple requests at once.
 
+## Feature
+
+- supports process multiple requests in one call
+- easy to use: simple interface
+- variety of error handling: both supported procedural or callback
 
 ## Demo
 
@@ -72,3 +77,13 @@ require 'vendor/autoload.php';
 ## Author
 
 [stk2k](https://github.com/stk2k)
+
+## Disclaimer
+
+This software is no warranty.
+
+We are not responsible for any results caused by the use of this software.
+
+Please use the responsibility of the your self.
+
+
