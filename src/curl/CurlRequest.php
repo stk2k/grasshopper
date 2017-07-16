@@ -78,12 +78,15 @@ class CurlRequest
             CURLOPT_URL => $url,
             CURLOPT_HEADER => true,
             CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_PROGRESSFUNCTION => function($resource, $down_size, $downloaded, $upload_size, $uploaded){
+                return $downloaded > $this->max_download_size ? 1 : 0;
+            },
 
             /* user customizable fields by options parameter */
             CURLOPT_USERAGENT => Grasshopper::DEFAULT_USERAGENT,
             CURLOPT_PROXY => null,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_NONE,
-            CURLOPT_HTTPHEADER => (new CurlRequestHeader)->compile(),
+            CURLOPT_HTTPHEADER => '',
             CURLOPT_BUFFERSIZE => Grasshopper::DEFAULT_BUFFER_SIZE,
 
             /* SSL */
@@ -97,13 +100,17 @@ class CurlRequest
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
+            
+            /* curlinfo header out */
+            CURLINFO_HEADER_OUT => false,
+            
+            /* callback functions */
+            CURLOPT_HEADERFUNCTION => null,
+            CURLOPT_WRITEFUNCTION => null,
 
             /* file */
             CURLOPT_FILE => $this->tmpfile,
             CURLOPT_NOPROGRESS => false,
-            CURLOPT_PROGRESSFUNCTION => function($resource, $down_size, $downloaded, $upload_size, $uploaded){
-                return $downloaded > $this->max_download_size ? 1 : 0;
-            },
         ];
 
         $user_curl_options = [
@@ -122,6 +129,14 @@ class CurlRequest
             CURLOPT_MAXREDIRS => isset($options['max_redirs']) ? $options['max_redirs'] : null,
             CURLOPT_FOLLOWLOCATION => isset($options['follow_location']) ? $options['follow_location'] : null,
             CURLOPT_AUTOREFERER => isset($options['auto_referer']) ? $options['auto_referer'] : null,
+    
+            /* curlinfo header out */
+            CURLINFO_HEADER_OUT => isset($options['info_header_out']) ? $options['info_header_out'] : false,
+    
+            /* header functions */
+            CURLOPT_HEADERFUNCTION => isset($options['header_function']) ? $options['header_function'] : null,
+            CURLOPT_WRITEFUNCTION => isset($options['write_function']) ? $options['write_function'] : null,
+
         ];
 
         // HTTP header
@@ -135,7 +150,7 @@ class CurlRequest
         $user_curl_options[CURLOPT_HTTPHEADER] = $user_http_header->compile();
 
         // merge options between user and defaults
-        $real_options = [];
+        $real_options = array();
         foreach($dafaults as $k => $v){
             $user_val = isset($user_curl_options[$k]) ? $user_curl_options[$k] : null;
             $real_options[$k] = $user_val !== null ? $user_val : $v;
@@ -168,6 +183,17 @@ class CurlRequest
         }
         else{
             $real_options[CURLOPT_CONNECTTIMEOUT] = self::DEFAULT_CONNECTTIMEOUT;
+        }
+    
+        // unset unnecessary options
+        $unnecessary_check_functions = array(
+            CURLOPT_HEADERFUNCTION => function($item) { return !is_callable($item); },
+            CURLOPT_WRITEFUNCTION => function($item) { return !is_callable($item); },
+        );
+        foreach($unnecessary_check_functions as $key => $unnecessary_check){
+            if ( array_key_exists($key,$real_options) && $unnecessary_check($real_options[$key]) ){
+                unset($real_options[$key]);
+            }
         }
 
         $this->options = $real_options;

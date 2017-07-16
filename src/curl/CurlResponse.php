@@ -5,11 +5,11 @@ use Grasshopper\exception\DeflateException;
 
 class CurlResponse
 {
+    /** @var array */
+    private $info;
+    
     /** @var string */
     private $protocol;
-
-    /** @var int */
-    private $http_code;
 
     /** @var string */
     private $reason_phrase;
@@ -18,16 +18,7 @@ class CurlResponse
     private $protocol_version;
 
     /** @var string */
-    private $url;
-
-    /** @var string */
-    private $content_type;
-
-    /** @var string */
     private $host;
-
-    /** @var string */
-    private $effective_url;
 
     /** @var string */
     private $body;
@@ -41,9 +32,6 @@ class CurlResponse
     /** @var string */
     private $content_encoding;
 
-    /** @var int */
-    private $download_content_length;
-
     /**
      * Constructs grasshopper object
      *
@@ -53,12 +41,8 @@ class CurlResponse
      */
     public function __construct(array $info, $content)
     {
-        $this->http_code = $info['http_code'];
-        $this->content_type = $info['content_type'];
-        $this->url = $info['url'];
-        $this->effective_url = $info['effective_url'];
-        $this->download_content_length = $info['download_content_length'];
-
+        $this->info = $info;
+        
         // get header from content
         $header = substr($content, 0, $info["header_size"]);
         $header = strtr($header, ["\r\n"=>"\n","\r"=>"\n"]);
@@ -73,11 +57,25 @@ class CurlResponse
         $body = $this->content_encoding ? $this->deflateCompressedData($body) : $body;
 
         // detect character encoding
-        $this->charset = $this->detectCharset($body);
+        $this->charset = $this->detectCharset($body, $info["content_type"]);
 
         // convert body and reason phrase encoding to utf8
         $this->body = $this->charset ? $this->convertEncoding($body, $this->charset) : $body;
         $this->reason_phrase = $this->charset ? $this->convertEncoding($this->reason_phrase, $this->charset) : $this->reason_phrase;
+    }
+    
+    /**
+     * Get info
+     *
+     * @param string|null $key
+     *
+     * @return array
+     */
+    public function getInfo($key = null){
+        if($key){
+            return isset($this->info[$key]) ? $this->info[$key] : null;
+        }
+        return $this->info;
     }
 
     /**
@@ -86,7 +84,7 @@ class CurlResponse
      * @return int
      */
     public function getStatusCode(){
-        return $this->http_code;
+        return isset($this->info['http_code']) ? $this->info['http_code'] : -1;
     }
 
     /**
@@ -122,7 +120,7 @@ class CurlResponse
      * @return string
      */
     public function getContentType(){
-        return $this->content_type;
+        return isset($this->info['content_type']) ? $this->info['content_type'] : '';
     }
 
     /**
@@ -131,7 +129,7 @@ class CurlResponse
      * @return string
      */
     public function getContentLength(){
-        return $this->download_content_length;
+        return isset($this->info['download_content_length']) ? $this->info['download_content_length'] : -1;
     }
 
     /**
@@ -149,7 +147,7 @@ class CurlResponse
      * @return string
      */
     public function getUrl(){
-        return $this->url;
+        return isset($this->info['url']) ? $this->info['url'] : '';
     }
 
     /**
@@ -158,7 +156,7 @@ class CurlResponse
      * @return string
      */
     public function getEffectiveUrl(){
-        return $this->effective_url;
+        return isset($this->info['effective_url']) ? $this->info['effective_url'] : '';
     }
 
     /**
@@ -218,13 +216,14 @@ class CurlResponse
      * detect charset
      *
      * @param string $body
+     * @param string $content_type
      *
      * @return string
      */
-    private function detectCharset( $body )
+    private function detectCharset( $body, $content_type )
     {
         // get character encoding from Content-Type header
-        preg_match( '@([\w/+]+)(;\s+charset=(\S+))?@i', $this->content_type, $matches );
+        preg_match( '@([\w/+]+)(;\s+charset=(\S+))?@i', $content_type, $matches );
         $charset = isset($matches[3]) ? $matches[3] : $this->charset;
 
         $php_encoding = $charset ? self::getPhpEncoding($charset) : null;

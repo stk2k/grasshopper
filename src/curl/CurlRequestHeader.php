@@ -14,11 +14,11 @@ class CurlRequestHeader
      *
      * @param array $headers
      */
-    public function __construct(array $headers = [])
+    public function __construct(array $headers = array())
     {
         // options
         $dafaults = [
-            'Content-type' => 'text/plain',
+            'Content-Type' => 'text/plain',
             'User-Agent' => Grasshopper::DEFAULT_USERAGENT,
             'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language' => 'en-us;q=0.7,en;q=0.3',
@@ -47,10 +47,26 @@ class CurlRequestHeader
      */
     public function compile()
     {
-        $compiled = [];
+        $compiled = array();
         foreach( $this->headers as $k => $v ){
-            $compiled[$k] = Sanitizer::removeControlChars($v);
+            $v = Sanitizer::removeControlChars($v);
+            if (is_string($k)){
+                $compiled[] = "$k: $v";
+            }
+            elseif( is_integer($k)){
+                $compiled[] = $v;
+            }
         }
         return $compiled;
+    }
+    
+    /**
+     * return headers
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 }
