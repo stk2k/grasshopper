@@ -61,9 +61,6 @@ class CurlOptionTest extends PHPUnit_Framework_TestCase
             $actual = CurlOption::getString(CURLOPT_SSL_FALSESTART);
             $this->assertEquals('CURLOPT_SSL_FALSESTART', $actual);
             
-            $actual = CurlOption::getString(CURLOPT_SSL_OPTIONS);
-            $this->assertEquals('CURLOPT_SSL_OPTIONS', $actual);
-    
             $actual = CurlOption::getString(CURL_HTTP_VERSION_2TLS);
             $this->assertEquals('CURL_HTTP_VERSION_2TLS', $actual);
         }

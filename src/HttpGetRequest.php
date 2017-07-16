@@ -14,7 +14,7 @@ class HttpGetRequest extends CurlRequest
      * @param array $query_data
      * @param array $options
      */
-    public function __construct($url, array $query_data = null, array $options = [])
+    public function __construct($url, $query_data = null, $options = null)
     {
         if ($query_data && !empty($query_data)){
             $url .= '?' . http_build_query($query_data);

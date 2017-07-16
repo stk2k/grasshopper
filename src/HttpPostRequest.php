@@ -23,7 +23,7 @@ class HttpPostRequest extends CurlRequest
      * @param array $post_data
      * @param array $options
      */
-    public function __construct($url, array $post_data, array $options = [])
+    public function __construct($url, $post_data, $options = array())
     {
         $options['post_fields'] = http_build_query(Sanitizer::removeControlChars($post_data));
         $options['post'] = true;

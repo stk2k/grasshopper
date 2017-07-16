@@ -141,24 +141,53 @@ class Grasshopper
     }
 
     /**
-     * Add request
+     * Add get request
      *
      * @param string|CurlRequest $request
+     * @param array $query_data
      * @param array $options
      *
      * @return Grasshopper
      *
      * @throws \InvalidArgumentException
      */
-    public function addRequest($request, $options = array())
+    public function addGetRequest($request, $query_data = null, $options = null)
     {
-        if (!is_string($request) && !($request instanceof CurlRequest)){
-            throw new \InvalidArgumentException('request paramter must be string or CurlRequest');
+        if (is_string($request)){
+            $this->requests[] = new HttpGetRequest($request, $query_data, $options);
+            return $this;
         }
-        $this->requests[] = is_string($request) ? new HttpGetRequest($request, $options) : $request;
-        return $this;
+        if ($request instanceof HttpGetRequest){
+            $this->requests[] = $request;
+            return $this;
+        }
+        throw new \InvalidArgumentException('request paramter must be string or HttpGetRequest');
     }
-
+    
+    /**
+     * Add post request
+     *
+     * @param string|CurlRequest $request
+     * @param array $post_data
+     * @param array $options
+     *
+     * @return Grasshopper
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addPostRequest($request, $post_data = null, $options = null)
+    {
+        if (is_string($request)){
+            $this->requests[] = new HttpPostRequest($request, $post_data, $options);
+            return $this;
+        }
+        if ($request instanceof HttpPostRequest){
+            $this->requests[] = $request;
+            return $this;
+        }
+        throw new \InvalidArgumentException('request paramter must be string or HttpPostRequest');
+    }
+    
     /**
      * Add requests
      *

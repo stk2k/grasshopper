@@ -41,8 +41,12 @@ class CurlRequest
      * @param string $url
      * @param array $options
      */
-    public function __construct($method, $url, array $options = [])
+    public function __construct($method, $url, $options = null)
     {
+        if (!$options){
+            $options = array();
+        }
+        
         // method
         $this->method = strtoupper(trim($method));
 

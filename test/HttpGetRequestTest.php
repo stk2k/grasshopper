@@ -1,7 +1,5 @@
 <?php
 use Grasshopper\HttpGetRequest;
-use Grasshopper\HttpPostRequest;
-use Grasshopper\curl\CurlRequest;
 
 class HttpGetRequestTest extends PHPUnit_Framework_TestCase
 {

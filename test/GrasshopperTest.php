@@ -21,7 +21,7 @@ class GrasshopperTest extends PHPUnit_Framework_TestCase
     
         $url = 'http://example.com';
     
-        $hopper->addRequest($url);
+        $hopper->addGetRequest($url);
     
         $result = $hopper->waitForAll();
     
@@ -41,7 +41,7 @@ class GrasshopperTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(0, count($hopper->getRequests()) );
 
-        $hopper->addRequest('http://localhost:8000/test1.html');
+        $hopper->addGetRequest('http://localhost:8000/test1.html');
 
         $this->assertEquals(1, count($hopper->getRequests()) );
     }
@@ -83,7 +83,7 @@ class GrasshopperTest extends PHPUnit_Framework_TestCase
 
         $url = $this->url_base . '/test1.html';
 
-        $hopper->addRequest($url);
+        $hopper->addGetRequest($url);
 
         $result = $hopper->waitForAll(false);
 
@@ -105,7 +105,7 @@ class GrasshopperTest extends PHPUnit_Framework_TestCase
 
         $url = $this->url_base . '/404.html';
 
-        $hopper->addRequest($url);
+        $hopper->addGetRequest($url);
 
         $result = $hopper->waitForAll(false);
 
@@ -143,7 +143,7 @@ class GrasshopperTest extends PHPUnit_Framework_TestCase
             'max_download_size' => 10485760,   // 10MB
             ];
 
-        $hopper->addRequest($url, $options);
+        $hopper->addGetRequest($url, null, $options);
 
         $result = $hopper->waitForAll(false);
 

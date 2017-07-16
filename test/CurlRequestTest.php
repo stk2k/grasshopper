@@ -24,7 +24,7 @@ class CurlRequestTest extends PHPUnit_Framework_TestCase
             'verbose' => true
         );
 
-        $req = new HttpGetRequest('http://sample.com', $options);
+        $req = new HttpGetRequest('http://sample.com', null, $options);
 
         $actual = $req->isVerbose();
 
@@ -69,7 +69,7 @@ class CurlRequestTest extends PHPUnit_Framework_TestCase
             'timeout' => 999
         );
 
-        $req = new HttpGetRequest('http://sample.com',$options);
+        $req = new HttpGetRequest('http://sample.com', null, $options);
 
         $actual = $req->getTimeout();
 
@@ -87,7 +87,7 @@ class CurlRequestTest extends PHPUnit_Framework_TestCase
             'timeout_ms' => 999
         );
 
-        $req = new HttpGetRequest('http://sample.com',$options);
+        $req = new HttpGetRequest('http://sample.com',null, $options);
 
         $actual = $req->getTimeout(true);
 
@@ -119,7 +119,7 @@ class CurlRequestTest extends PHPUnit_Framework_TestCase
             'connect_timeout' => 999
         );
 
-        $req = new HttpGetRequest('http://sample.com',$options);
+        $req = new HttpGetRequest('http://sample.com', null, $options);
 
         $actual = $req->getConnectTimeout();
 
@@ -137,7 +137,7 @@ class CurlRequestTest extends PHPUnit_Framework_TestCase
             'connect_timeout_ms' => 999
         );
 
-        $req = new HttpGetRequest('http://sample.com',$options);
+        $req = new HttpGetRequest('http://sample.com', null, $options);
 
         $actual = $req->getConnectTimeout(true);
 
