@@ -192,8 +192,6 @@ class CurlRequest
         }
 
         $this->options = $real_options;
-        
-        $this->printOptions();
     }
 
     /**
