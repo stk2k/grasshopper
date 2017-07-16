@@ -9,7 +9,9 @@ $hopper = new Grasshopper();
 
 $url = 'http://sample.com';
 
-$hopper->addGetRequest($url,null);
+$options = array('verbose'=>true);
+
+$hopper->addGetRequest($url,null,$options);
 
 $result = $hopper->waitForAll();
 
@@ -19,7 +21,8 @@ if ( $res instanceof SuccessEvent ){
     $status = $res->getResponse()->getStatusCode();
     $body = $res->getResponse()->getBody();
     echo "success: status=$status" . PHP_EOL;
-    echo $body . PHP_EOL;
+    echo "request_header:" . $body . PHP_EOL;
+    echo "request_header:" . $res->getResponse()->getRequestHeader() . PHP_EOL;
 }
 elseif ( $res instanceof ErrorEvent ){
     // error

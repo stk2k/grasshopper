@@ -81,6 +81,7 @@ class CurlRequest
             CURLOPT_PROGRESSFUNCTION => function($resource, $down_size, $downloaded, $upload_size, $uploaded){
                 return $downloaded > $this->max_download_size ? 1 : 0;
             },
+            CURLINFO_HEADER_OUT => true,
 
             /* user customizable fields by options parameter */
             CURLOPT_USERAGENT => Grasshopper::DEFAULT_USERAGENT,
@@ -100,9 +101,6 @@ class CurlRequest
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
-            
-            /* curlinfo header out */
-            CURLINFO_HEADER_OUT => false,
             
             /* callback functions */
             CURLOPT_HEADERFUNCTION => null,
@@ -129,9 +127,6 @@ class CurlRequest
             CURLOPT_MAXREDIRS => isset($options['max_redirs']) ? $options['max_redirs'] : null,
             CURLOPT_FOLLOWLOCATION => isset($options['follow_location']) ? $options['follow_location'] : null,
             CURLOPT_AUTOREFERER => isset($options['auto_referer']) ? $options['auto_referer'] : null,
-    
-            /* curlinfo header out */
-            CURLINFO_HEADER_OUT => isset($options['info_header_out']) ? $options['info_header_out'] : false,
     
             /* header functions */
             CURLOPT_HEADERFUNCTION => isset($options['header_function']) ? $options['header_function'] : null,
@@ -197,6 +192,8 @@ class CurlRequest
         }
 
         $this->options = $real_options;
+        
+        $this->printOptions();
     }
 
     /**

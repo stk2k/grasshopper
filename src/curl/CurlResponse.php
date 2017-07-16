@@ -158,6 +158,15 @@ class CurlResponse
     public function getEffectiveUrl(){
         return isset($this->info['effective_url']) ? $this->info['effective_url'] : '';
     }
+    
+    /**
+     * Get request header
+     *
+     * @return string
+     */
+    public function getRequestHeader(){
+        return isset($this->info['request_header']) ? $this->info['request_header'] : '';
+    }
 
     /**
      * Get body
