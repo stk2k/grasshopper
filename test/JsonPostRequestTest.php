@@ -1,7 +1,7 @@
 <?php
-use Grasshopper\HttpPostRequest;
+use Grasshopper\JsonPostRequest;
 
-class HttpPostRequestTest extends PHPUnit_Framework_TestCase
+class JsonPostRequestTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -9,7 +9,7 @@ class HttpPostRequestTest extends PHPUnit_Framework_TestCase
 
     public function testNoData()
     {
-        $req = new HttpPostRequest('http://example.com',array());
+        $req = new JsonPostRequest('http://example.com',array());
 
         $this->assertEquals('http://example.com', $req->getUrl());
         $this->assertEmpty($req->getPostData());
@@ -18,7 +18,7 @@ class HttpPostRequestTest extends PHPUnit_Framework_TestCase
     public function testSimpleQuery()
     {
         $post_data = array('foo'=>'bar');
-        $req = new HttpPostRequest('http://example.com', $post_data);
+        $req = new JsonPostRequest('http://example.com', $post_data);
         
         $this->assertEquals('http://example.com', $req->getUrl());
         $this->assertEquals(1, count($req->getPostData()));
@@ -28,7 +28,7 @@ class HttpPostRequestTest extends PHPUnit_Framework_TestCase
     public function testSomeQuery()
     {
         $post_data = array('foo'=>'bar','fruits'=>'apple');
-        $req = new HttpPostRequest('http://example.com', $post_data);
+        $req = new JsonPostRequest('http://example.com', $post_data);
     
         $this->assertEquals('http://example.com', $req->getUrl());
         $this->assertEquals(2, count($req->getPostData()));
@@ -37,32 +37,24 @@ class HttpPostRequestTest extends PHPUnit_Framework_TestCase
     
     public function testContentType()
     {
-        $req = new HttpPostRequest('http://example.com',array());
+        $req = new JsonPostRequest('http://example.com',array());
         
         $options = $req->getOptions();
         
         $this->assertTrue(isset($options[CURLOPT_HTTPHEADER]));
-        $this->assertContains('Content-Type: application/x-www-form-urlencoded',$options[CURLOPT_HTTPHEADER]);
+        $this->assertContains('Content-Type: application/json',$options[CURLOPT_HTTPHEADER]);
     }
     
     public function testPostFields()
     {
         $post_data = array('foo'=>'bar','fruits'=>'apple');
-        $req = new HttpPostRequest('http://example.com',$post_data);
+        $req = new JsonPostRequest('http://example.com',$post_data);
         
         $options = $req->getOptions();
         
         $this->assertTrue(isset($options[CURLOPT_POSTFIELDS]));
         $this->assertInternalType('string',$options[CURLOPT_POSTFIELDS]);
-    
-        $data = null;
-        parse_str($options[CURLOPT_POSTFIELDS],$data);
-        
-        $this->assertTrue(is_array($data));
-        $this->assertEquals(2, count($data));
-        $this->assertTrue(isset($data['foo']));
-        $this->assertTrue(isset($data['fruits']));
-        $this->assertEquals('bar', $data['foo']);
-        $this->assertEquals('apple', $data['fruits']);
+        $this->assertInternalType('object',json_decode($options[CURLOPT_POSTFIELDS], false));
     }
+    
 }
