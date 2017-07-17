@@ -61,6 +61,17 @@ class CurlRequestHeader
     }
     
     /**
+     * add headers
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function setHeader($key, $value)
+    {
+        $this->headers[$key] = $value;
+    }
+    
+    /**
      * return headers
      *
      * @return array
