@@ -156,7 +156,9 @@ class CurlRequest
 
         // debug
         $real_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : false;
-        $real_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : STDERR;
+        if (defined('STDERR')){
+            $real_options[CURLOPT_STDERR] = isset($options['stderr']) ? $options['stderr'] : STDERR;
+        }
 
         // set timeout
         if ( isset($options['timeout']) ){
