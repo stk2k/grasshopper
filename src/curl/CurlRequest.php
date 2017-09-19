@@ -109,6 +109,9 @@ class CurlRequest
             /* file */
             CURLOPT_FILE => $this->tmpfile,
             CURLOPT_NOPROGRESS => false,
+            
+            /* Authentication */
+            CURLOPT_USERPWD => null,
         ];
 
         $user_curl_options = [
@@ -131,7 +134,9 @@ class CurlRequest
             /* header functions */
             CURLOPT_HEADERFUNCTION => isset($options['header_function']) ? $options['header_function'] : null,
             CURLOPT_WRITEFUNCTION => isset($options['write_function']) ? $options['write_function'] : null,
-
+    
+            /* Authentication */
+            CURLOPT_USERPWD => isset($options['user_password']) ? $options['user_password'] : null,
         ];
 
         // HTTP header
