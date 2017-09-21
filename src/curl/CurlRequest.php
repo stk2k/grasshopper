@@ -8,13 +8,10 @@ use Grasshopper\event\SuccessEvent;
 use Grasshopper\event\ErrorEvent;
 use Grasshopper\debug\CurlDebug;
 
-class CurlRequest
+abstract class CurlRequest
 {
     const DEFAULT_TIMEOUT = 60;
     const DEFAULT_CONNECTTIMEOUT = 60;
-
-    /** @var string */
-    private $method;
 
     /** @var string */
     private $url;
@@ -37,19 +34,15 @@ class CurlRequest
     /**
      * Constructs cURL request object
      *
-     * @param string $method
      * @param string $url
      * @param array $options
      */
-    public function __construct($method, $url, $options = null)
+    public function __construct($url, $options = null)
     {
         if (!$options){
             $options = array();
         }
         
-        // method
-        $this->method = strtoupper(trim($method));
-
         // URL
         $this->url = $url;
         if ( parse_url($url) === false ){
@@ -156,9 +149,6 @@ class CurlRequest
             $real_options[$k] = $user_val !== null ? $user_val : $v;
         }
 
-        // custom request
-        $real_options[CURLOPT_CUSTOMREQUEST] = $this->method;
-
         // debug
         $real_options[CURLOPT_VERBOSE] = isset($options['verbose']) ? $options['verbose'] : false;
         if (defined('STDERR')){
@@ -198,8 +188,17 @@ class CurlRequest
             }
         }
 
-        $this->options = $real_options;
+        $this->options = $this->overrideOptions( $real_options );
     }
+    
+    /**
+     * Override curl options
+     *
+     * @param array $options
+     *
+     * @return array
+     */
+    abstract protected function overrideOptions($options);
 
     /**
      * Check if verbose

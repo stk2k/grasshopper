@@ -3,12 +3,12 @@ namespace Grasshopper;
 
 use Grasshopper\curl\CurlRequest;
 
-class HttpGetRequest extends CurlRequest
+class HttpHeadRequest extends CurlRequest
 {
     private $query_data;
     
     /**
-     * Constructs HTTP Get request object
+     * Constructs HTTP HEAD request object
      *
      * @param string $url
      * @param array $query_data
@@ -43,8 +43,10 @@ class HttpGetRequest extends CurlRequest
     protected function overrideOptions($options)
     {
         $override = array(
-            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_CUSTOMREQUEST => 'HEAD',
+            CURLOPT_NOBODY => true
         );
         return array_replace( $options, $override );
     }
+    
 }

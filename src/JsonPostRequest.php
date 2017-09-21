@@ -10,8 +10,6 @@ namespace Grasshopper;
 
 use Grasshopper\curl\CurlRequest;
 use Grasshopper\curl\CurlRequestHeader;
-use Grasshopper\util\Sanitizer;
-
 
 class JsonPostRequest extends CurlRequest
 {
@@ -47,7 +45,7 @@ class JsonPostRequest extends CurlRequest
         $options['http_header'] = $http_header;
         
         $this->post_data = $post_data;
-        parent::__construct( 'POST', $url, $options );
+        parent::__construct( $url, $options );
     }
     
     /**
@@ -58,5 +56,20 @@ class JsonPostRequest extends CurlRequest
     public function getPostData()
     {
         return $this->post_data;
+    }
+    
+    /**
+     * Override curl options
+     *
+     * @param array $options
+     *
+     * @return array
+     */
+    protected function overrideOptions($options)
+    {
+        $override = array(
+            CURLOPT_CUSTOMREQUEST => 'POST',
+        );
+        return array_replace( $options, $override );
     }
 }

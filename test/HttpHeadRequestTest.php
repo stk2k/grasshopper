@@ -1,9 +1,9 @@
 <?php
-use Grasshopper\HttpGetRequest;
+use Grasshopper\HttpHeadRequest;
 use Grasshopper\Grasshopper;
 use Grasshopper\event\SuccessEvent;
 
-class HttpGetRequestTest extends PHPUnit_Framework_TestCase
+class HttpHeadRequestTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -11,7 +11,7 @@ class HttpGetRequestTest extends PHPUnit_Framework_TestCase
 
     public function testNoQuery()
     {
-        $req = new HttpGetRequest('http://example.com');
+        $req = new HttpHeadRequest('http://example.com');
 
         $this->assertEquals('http://example.com', $req->getUrl());
         $this->assertEmpty($req->getQueryData());
@@ -20,7 +20,7 @@ class HttpGetRequestTest extends PHPUnit_Framework_TestCase
     public function testSimpleQuery()
     {
         $query = array('foo'=>'bar');
-        $req = new HttpGetRequest('http://example.com', $query);
+        $req = new HttpHeadRequest('http://example.com', $query);
         
         $this->assertEquals('http://example.com?foo=bar', $req->getUrl());
         $this->assertEquals($query, $req->getQueryData());
@@ -29,7 +29,7 @@ class HttpGetRequestTest extends PHPUnit_Framework_TestCase
     public function testSomeQuery()
     {
         $query = array('foo'=>'bar','fruits'=>'apple');
-        $req = new HttpGetRequest('http://example.com', $query);
+        $req = new HttpHeadRequest('http://example.com', $query);
         
         $this->assertEquals('http://example.com?foo=bar&fruits=apple', $req->getUrl());
         $this->assertEquals($query, $req->getQueryData());
@@ -41,8 +41,8 @@ class HttpGetRequestTest extends PHPUnit_Framework_TestCase
     public function testRequestGet()
     {
         $url = 'http://localhost:8080';
-        $req = new HttpGetRequest($url);
-    
+        $req = new HttpHeadRequest($url);
+        
         $hopper = new Grasshopper();
         
         $hopper->addRequest($req);
@@ -56,7 +56,7 @@ class HttpGetRequestTest extends PHPUnit_Framework_TestCase
             echo print_r($headers,true) . PHP_EOL;
             
             $this->assertEquals(200, $res->getResponse()->getStatusCode());
-            $this->assertEquals('GET', $headers['Method']);
+            $this->assertEquals('HEAD', $headers['Method']);
         }
         else{
             $this->fail('GET request returned failure result');

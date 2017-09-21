@@ -31,6 +31,9 @@ class CurlResponse
 
     /** @var string */
     private $content_encoding;
+    
+    /** @var array */
+    private $headers_parsed;
 
     /**
      * Constructs grasshopper object
@@ -185,6 +188,15 @@ class CurlResponse
     public function getHeaders(){
         return $this->headers;
     }
+    
+    /**
+     * Get parsed headers
+     *
+     * @return array
+     */
+    public function getHeadersParsed(){
+        return $this->headers_parsed;
+    }
 
     /**
      * parse headers
@@ -206,17 +218,25 @@ class CurlResponse
             $this->protocol = ($p !== false) ? substr($protocol_and_version,0,$p) : $protocol_and_version;
             $this->protocol_version = ($p !== false) ? substr($protocol_and_version,$p+1) : '';
         }
-
-
+    
+        $this->headers_parsed = array();
         foreach( $this->headers as $h ){
             if ( preg_match( '@Content-Encoding:\s+([\w/+]+)@i', $h, $matches ) ){
                 $this->content_encoding = isset($matches[1]) ? strtolower($matches[1]) : null;
             }
-            if ( preg_match( '@Content-Type:\s*([\w/+-\/]+);\s*charset=\s*([\w/+\-]+)@i', $h, $matches ) ){
+            elseif ( preg_match( '@Content-Type:\s*([\w/+-\/]+);\s*charset=\s*([\w/+\-]+)@i', $h, $matches ) ){
                 $this->charset = isset($matches[2]) ? strtolower($matches[2]) : null;
             }
             elseif ( preg_match( '@Host:\s+([\w/:+]+)@i', $h, $matches ) ){
                 $this->host = isset($matches[1]) ? strtolower($matches[1]) : null;
+            }
+            
+            // parse header
+            $pos = strpos($h,':');
+            if ($pos > 1){
+                $key = trim(substr($h,0,$pos));
+                $value = trim(substr($h,$pos+1));
+                $this->headers_parsed[$key] = $value;
             }
         }
     }

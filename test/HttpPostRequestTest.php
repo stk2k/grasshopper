@@ -1,5 +1,7 @@
 <?php
 use Grasshopper\HttpPostRequest;
+use Grasshopper\Grasshopper;
+use Grasshopper\event\SuccessEvent;
 
 class HttpPostRequestTest extends PHPUnit_Framework_TestCase
 {
@@ -64,5 +66,34 @@ class HttpPostRequestTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(isset($data['fruits']));
         $this->assertEquals('bar', $data['foo']);
         $this->assertEquals('apple', $data['fruits']);
+    }
+    
+    /**
+     * Need to run /bin/http_server.php before running this test
+     */
+    public function testRequestGet()
+    {
+        $url = 'http://localhost:8080';
+        $post_data = array('foo'=>'bar','fruits'=>'apple');
+        $req = new HttpPostRequest($url,$post_data);
+        
+        $hopper = new Grasshopper();
+        
+        $hopper->addRequest($req);
+        
+        $result = $hopper->waitForAll();
+        
+        $res = $result[$url];
+        
+        if ($res instanceof SuccessEvent){
+            $headers = $res->getResponse()->getHeadersParsed();
+            echo print_r($headers,true) . PHP_EOL;
+            
+            $this->assertEquals(200, $res->getResponse()->getStatusCode());
+            $this->assertEquals('POST', $headers['Method']);
+        }
+        else{
+            $this->fail('GET request returned failure result');
+        }
     }
 }
