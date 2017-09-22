@@ -141,7 +141,7 @@ class Grasshopper
     }
 
     /**
-     * Add get request
+     * Add GET request
      *
      * @param string $url
      * @param array $query_data
@@ -161,7 +161,7 @@ class Grasshopper
     }
     
     /**
-     * Add post request
+     * Add POST request
      *
      * @param string $url
      * @param array $post_data
@@ -177,6 +177,26 @@ class Grasshopper
             throw new \InvalidArgumentException('request must be string');
         }
         $this->requests[] = new HttpPostRequest($url, $post_data, $options);
+        return $this;
+    }
+    
+    /**
+     * Add HEAD request
+     *
+     * @param string $url
+     * @param array $query_data
+     * @param array $options
+     *
+     * @return Grasshopper
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addHeadRequest($url, $query_data = null, $options = null)
+    {
+        if (!is_string($url)){
+            throw new \InvalidArgumentException('url must be string');
+        }
+        $this->requests[] = new HttpHeadRequest($url, $query_data, $options);
         return $this;
     }
     
