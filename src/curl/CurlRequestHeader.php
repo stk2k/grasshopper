@@ -19,7 +19,6 @@ class CurlRequestHeader
         // options
         $dafaults = [
             'Content-Type' => 'text/plain',
-            'User-Agent' => Grasshopper::DEFAULT_USERAGENT,
             'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language' => 'en-us;q=0.7,en;q=0.3',
             'Accept-Encoding' => 'gzip, deflate',
