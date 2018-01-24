@@ -90,7 +90,6 @@ class HttpPostRequestTest extends PHPUnit_Framework_TestCase
             echo print_r($headers,true) . PHP_EOL;
             
             $this->assertEquals(200, $res->getResponse()->getStatusCode());
-            $this->assertEquals('POST', $headers['Method']);
         }
         else{
             $this->fail('GET request returned failure result');

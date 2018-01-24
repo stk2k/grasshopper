@@ -17,7 +17,6 @@ class CurlRequestHeaderTest extends PHPUnit_Framework_TestCase
         $headers = $headers->getValue($header);
         
         $this->assertArrayHasKey('Content-Type',$headers);
-        $this->assertArrayHasKey('User-Agent',$headers);
         $this->assertArrayHasKey('Accept',$headers);
         $this->assertArrayHasKey('Accept-Language',$headers);
         $this->assertArrayHasKey('Accept-Encoding',$headers);

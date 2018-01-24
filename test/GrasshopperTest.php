@@ -6,7 +6,7 @@ use \Grasshopper\event\SuccessEvent;
 
 class GrasshopperTest extends PHPUnit_Framework_TestCase
 {
-    const LOCAL_PORT = '8082';
+    const LOCAL_PORT = '8080';
 
     private $url_base;
 

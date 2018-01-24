@@ -3,7 +3,6 @@ namespace Grasshopper\debug;
 
 class CurlDebug
 {
-
     /**
      * Print cUrl options
      *
@@ -19,12 +18,16 @@ class CurlDebug
                     echo "$key => " . print_r($value,true) . PHP_EOL;
                     break;
                 case 'object':
-                    $func = new \ReflectionClass($value);
-                    echo "$key => class " . $func->getName(). PHP_EOL;
+                    echo "$key => class " . get_class($value) . PHP_EOL;
                     break;
                 case 'function':
-                    $func = new \ReflectionFunction($value);
-                    echo "$key => function " . $func->getName(). PHP_EOL;
+                    try{
+                        $func = new \ReflectionFunction($value);
+                        echo "$key => function " . $func->getName(). PHP_EOL;
+                    }
+                    catch(\ReflectionException $e){
+                        echo "$key => unknown function" . PHP_EOL;
+                    }
                     break;
                 default:
                     echo "$key => $value" . PHP_EOL;
